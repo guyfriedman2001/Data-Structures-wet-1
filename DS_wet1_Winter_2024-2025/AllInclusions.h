@@ -2,7 +2,6 @@
 #include "wet1util.h"
 #include "AbstractAVL.h"
 #include "IndexAble.h"
-#include "Horse.h"
 #include "NonOwningHorseAVL.h"
 #include "NonOwningHerdAVL.h"
 #include "OwningHorseAVL.h"
