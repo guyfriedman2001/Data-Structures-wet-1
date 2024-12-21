@@ -12,14 +12,23 @@
 
 #ifndef PLAINS25WINTER_WET1_H_
 #define PLAINS25WINTER_WET1_H_
-
 #include "wet1util.h"
+
+
+//#pragma once
+#include "ProjectFiles.h"
+#include <cassert>
+
 
 class Plains {
 private:
     //
     // Here you may add anything you want
     //
+    HorseTree* allHorses;
+    HorseMap* nonEmptyHerds; //FIXME change type to pointer to herd tree
+    HorseMap* emptyHerds; //FIXME change type to pointer to herd tree
+
     
 public:
     // <DO-NOT-MODIFY> {

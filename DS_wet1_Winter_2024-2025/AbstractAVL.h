@@ -1,16 +1,16 @@
 #include <cassert>
 
-template <typename V, typename R>
+template <typename Derived, typename V, typename R>
 class AbstractAVL {
 protected:
     static constexpr int EMPTY_TREE_HEIGHT = 0;
     static constexpr int MINUS_INFINITY = INT64_MIN;
     int index;
-    V value;
-    AbstractAVL<V, R>* left;
-    AbstractAVL<V, R>* right;
+    V* value;
+    Derived<V, R>* left;
+    Derived<V, R>* right;
     int height;
-    R returnVal; // This should be null (or equivalent) unless actively holding a required return value
+    R* returnVal; // This should be null (or equivalent) unless actively holding a required return value
 
 public:
     enum class Roll {
@@ -21,13 +21,14 @@ public:
         RR
     };
 
-    AbstractAVL(const V& value)
-        : index(value.getId()), value(value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT + 1), returnVal() {}
+    AbstractAVL(V& value)
+        : index(value.getId()), value(value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT + 1), returnVal(nullptr) {}
 
     virtual ~AbstractAVL() {
         delete left;
         delete right;
         deleteValue();
+        deleteReturnVal();
     }
 
     /**
@@ -36,7 +37,7 @@ public:
      * @param value - the value to be contained in the node
      * @return - a node of an instance of the inhereting class avl with the supplied value
      */
-    virtual AbstractAVL<V, R>* returnNewInstance(const V& value) = 0;
+    virtual Derived<V, R>* returnNewInstance(V& value) = 0;
 
     /**
      * define the desired behavior of the tree when a node with
@@ -47,28 +48,33 @@ public:
      * 
      * @param otherNode - the node that was trying to be inserted. 
      */
-    virtual void sameIndex(AbstractAVL<V, R>* otherNode) = 0;
+    virtual void sameIndex(Derived<V, R>* otherNode) = 0;
 
     /**
      * @return - desired value indicating a sucssesful insertion
      */
-    virtual R insertionSucces() = 0;
+    virtual R* insertionSucces() = 0;
 
     /**
      * @return - desired value indicating a sucssesful deletion
      */
-    virtual R deleteSucces() = 0;
+    virtual R* deleteSucces() = 0;
 
     /**
      * @return - desired value indicating that a deleted value was not found
      */
-    virtual R deleteNotFound() = 0;
+    virtual R* deleteNotFound() = 0;
 
     /**
      * FOR OWNING TREES ONLY - add call to the destructor of value
      * FOR NON OWNING TREES - do nothing
      */
     virtual void deleteValue() = 0;
+
+    /**
+     * how to handle deletion of returnVal
+     */
+    virtual void deleteReturnVal() = 0;
 
     /**
      * this function decides what happens when no return value is instantiated
@@ -79,11 +85,18 @@ public:
         throw "Problem in 'updateReturnVal' - no return value instantiated";
     }
 
+    /**
+     * new function must provide default implementation
+     */
+    virtual R* getReturnVal(){
+        return nullptr;
+    }
+
 
 
 protected:
 
-    void insertRight(AbstractAVL<V, R>* node) {
+    void insertRight(Derived<V, R>* node) {
         if (!this->right) {
             this->right = node;
             this->returnVal = insertionSucces();
@@ -93,7 +106,7 @@ protected:
         }
     }
 
-    void insertLeft(AbstractAVL<V, R>* node) {
+    void insertLeft(Derived<V, R>* node) {
         if (!this->left) {
             this->left = node;
             this->returnVal = insertionSucces();
@@ -103,7 +116,7 @@ protected:
         }
     }
 
-    void updateReturnVal(AbstractAVL<V, R>* node) {
+    void updateReturnVal(Derived<V, R>* node) {
         if (this->returnVal) return;
         if (node->returnVal) {
             this->returnVal = node->returnVal;
@@ -116,7 +129,7 @@ protected:
         //noReturnValFound();
     }
 
-    AbstractAVL<V, R>* Balance() {
+    Derived<V, R>* Balance() {
         this->heightUpdate(); //make sure height is updated
         Roll roll = this->getRoll();
         switch (roll) {
@@ -164,48 +177,48 @@ protected:
         return this->right->balanceFactor() <= 0 ? Roll::RR : Roll::RL;
     }
 
-    AbstractAVL<V, R>* LL() {
-        AbstractAVL<V, R>* temp = this->left;
+    Derived<V, R>* LL() {
+        Derived<V, R>* temp = this->left;
         this->left = temp->right;
         temp->right = this;
         temp->updateReturnVal(this);
         return temp;
     }
 
-    AbstractAVL<V, R>* LR() {
+    Derived<V, R>* LR() {
         this->left = this->left->RR();
         return this->LL();
     }
 
-    AbstractAVL<V, R>* RL() {
+    Derived<V, R>* RL() {
         this->right = this->right->LL();
         return this->RR();
     }
 
-    AbstractAVL<V, R>* RR() {
-        AbstractAVL<V, R>* temp = this->right;
+    Derived<V, R>* RR() {
+        Derived<V, R>* temp = this->right;
         this->right = temp->left;
         temp->left = this;
         temp->updateReturnVal(this);
         return temp;
     }
 
-    bool isLeaf(){
+    inline bool isLeaf(){
         return (this->left == nullptr) && (this->right == nullptr);
     }
 
-    bool oneChild(){
+    inline bool oneChild(){
         return (this->left == nullptr) ^ (this->right == nullptr);
     }
 
-    bool twoChildern(){
+    inline bool twoChildern(){
         return (this->left != nullptr) && (this->right != nullptr);
     }
 
     /**
      * absorb a given node into 'this', effectively 'deleting' 'this'.
      */
-    void absorbNode(AbstractAVL<V, R>* nodeToAbsorb){
+    void absorbNode(Derived<V, R>* nodeToAbsorb){
         assert(!this->isLeaf());
         this->deleteValue{};
         this->index = nodeToAbsorb->index;
@@ -221,7 +234,7 @@ protected:
      */
     void absorbChild(){
         assert(this->oneChild());
-        AbstractAVL<V, R>* child = nullptr;
+        Derived<V, R>* child = nullptr;
         if (this->left != nullptr){
             child = this->left;
         } else {
@@ -236,7 +249,7 @@ protected:
      */
     void replaceWithSuccssessor(){
         assert(this->twoChildern());
-        AbstractAVL<V, R>* succssesor = nullptr;
+        Derived<V, R>* succssesor = nullptr;
         if (this->right->left == nullptr){
             succssesor = this->right;
             this->right = nullptr;
@@ -256,12 +269,12 @@ protected:
      * 
      * @return - the value with the smallest index of a given tree
      */
-    AbstractAVL<V, R>* getSmallest() {
+    Derived<V, R>* getSmallest() {
         assert(this->left != nullptr);
         if(this->left->left != nullptr){
             return this->left->getSmallest();
         }
-        AbstractAVL<V, R>* temp = this->left;
+        Derived<V, R>* temp = this->left;
         this->left = temp->right;
         assert(temp->left == nullptr);
         return temp;
@@ -272,7 +285,7 @@ protected:
      * 
      * @return - the head of the balanced sub tree
      */
-    AbstractAVL<V, R>* updatePath(int index){
+    Derived<V, R>* updatePath(int index){
         int thisIndex = this->index;
         int fixIndex = index;
         assert(thisIndex != fixIndex);
@@ -285,7 +298,7 @@ protected:
         return this->Balance();
     }
 
-    AbstractAVL<V, R>* deleteThis() { //return the sub tree of 'this' without the node of 'this'.
+    Derived<V, R>* deleteThis() { //return the sub tree of 'this' without the node of 'this'.
         this->deleteValue();
         if (this->isLeaf()) {
             delete this;
@@ -305,8 +318,16 @@ protected:
 
 public:
 
-    AbstractAVL<V, R>* insert(const V& value) {
-        AbstractAVL<V, R>* node = returnNewInstance(value);
+    /**
+     * wrapping function to overload insert, same functionality
+     * as inserting a an existing node / sub tree.
+     * provides extra functionality.
+     * 
+     * @param value - value of the node to be inserted.
+     * @return - the root of the balanced tree after the addition of the new value.
+     */
+    Derived<V, R>* insert(const V& value) {
+        Derived<V, R>* node = returnNewInstance(value);
         return this->insert(node);
     }
     
@@ -316,7 +337,7 @@ public:
      * @param node - the node to be inserted into the tree of 'this'
      * @return - the balanced tree of 'this' after insertion
      */
-    AbstractAVL<V, R>* insert(AbstractAVL<V, R>* node) {
+    Derived<V, R>* insert(Derived<V, R>* node) {
         int nodeIndex = node->index;
         int thisIndex = this->index;
 
@@ -336,7 +357,14 @@ public:
         return this->Balance();
     }
 
-    AbstractAVL<V, R>* deleteNode(V& value) {
+    /**
+     * wrapping function to overload deleteNode, provide extra functionality in case
+     * a reference for the value to be deleted already exists.
+     * 
+     * @param value - value to be deleted/ removed from the tree.
+     * @return - the balanced tree without the removed value.
+     */
+    Derived<V, R>* deleteNode(V& value) {
         return this->deleteNode(value.getId());
     }
 
@@ -349,7 +377,7 @@ public:
      * @param index - the index of the node to be removed.
      * @return - the balanced tree after the removal of said node.
      */
-    AbstractAVL<V, R>* deleteNode(int index) {
+    Derived<V, R>* deleteNode(int index) {
         if (index == this->index) {
             return this->deleteThis();
         }
@@ -369,6 +397,39 @@ public:
         }
         this->heightUpdate();
         return this->Balance();
+    }
+
+
+    /**
+     * return a pointer to a value by a given index,
+     * if value is not found (index not in the tree) returned pointer will be null,
+     * however for the case that the value held at that index is supposed to be null,
+     * returnValue handling is encased in a specified function - findNotFound().
+     * 
+     * @param index - the index of the value to retrieve its pointer.
+     * @return - a pointer to the value of the corresponding index.
+     */
+    V* find(int index){
+            if (index == this->index) {
+            return this->value;
+        }
+        V* searchedValue = nullptr;
+        if (index < this->index) {
+            if (!this->left) {
+                this->returnVal = findNotFound();
+                return nullptr;
+            }
+            searchedValue = this->left->find(index);
+            this->updateReturnVal(this->left);
+        } else {
+            if (!this->right) {
+                this->returnVal = findNotFound();
+                return nullptr;
+            }
+            searchedValue = this->right->find(index);
+            this->updateReturnVal(this->right);
+        }
+        return searchedValue;
     }
 
 

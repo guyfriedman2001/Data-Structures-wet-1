@@ -1,3 +1,6 @@
+#pragma once
+
 class IndexAble{
-    virtual int getID() = 0;
+    virtual int getID() const = 0;
+    virtual ~IndexAble() = default;
 };

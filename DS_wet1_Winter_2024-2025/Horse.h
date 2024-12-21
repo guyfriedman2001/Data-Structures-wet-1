@@ -1,20 +1,67 @@
-#include "AllInclusions.h"
+#pragma once
+#include "ProjectFiles.h"
+#include <cassert>
 
-class Horse {
+class Horse : public IndexAble{
 private:
     int horseId;
-    double speed;
-    int following;
-    int herd;
+    int speed;
+    int herdID;
+    int herdInsertions;
+    Horse* follows;
+    int followsInsertion;
+    bool special_bool;
 public:
-    Horse(int id, double speed);
+    int getID() const override{
+        return this->horseId;
+    }
+    Horse(int id, int speed);
     ~Horse() = default;
-    int getID() const;
-    double getSpeed() const;
+    int getSpeed() const;
     void setFollow(int horseToFollow);
     void setHerd(int herdId);
 // comparison operators overload for use in tree methods.
     bool operator==(const Horse& otherHorse) const;
     bool operator>(const Horse& otherHorse) const;
     bool operator<(const Horse& otherHorse) const;
+    bool independant(){
+        Horse* followedHorse;
+        if ((followedHorse = this->follows) == nullptr){return true;}
+        int otherHerdInsertions = followedHorse->herdInsertions;
+        //if the horse that 'this' follows has moved a herd since
+        //'this' started following it.
+        if (this->followsInsertion != otherHerdInsertions){return true;}
+        assert((this->followsInsertion == otherHerdInsertions)&&(this->herdID == followedHorse->herdID));
+        return false;
+    }
+    bool sameHerd();
+    void follow(Horse* leader){
+        assert(leader->herdID == this->herdID);
+        this->follows = leader;
+        this->followsInsertion = leader->herdInsertions;
+    }
+    Horse* getFollows();
+    inline bool alreadyChecked(){return this->special_bool;}
+    inline void markChecked(){this->special_bool = true;}
+    inline void unCheck(){this->special_bool = false;}
+
+    /**
+     * NOTICE - THIS FUNCTION DOES NOT PRESERVE special_bool == false,
+     * RESET BOOL **MUST** BE INVOKED ON HERD AFTER THIS FUNCTION IS CALLED
+     */
+    bool inCircularReferance(int jumps){
+        if (jumps < 0){return true;}
+        bool maybeLeader = this->independant();
+        bool checkedNext = this->follows->alreadyChecked();
+        if (maybeLeader||checkedNext){
+            this->markChecked();
+            return false;
+        }
+        bool checkNext = this->follows->inCircularReferance(--jumps);
+        this->markChecked();
+        return checkNext;
+    }
+    
+
+
 };
