@@ -9,10 +9,18 @@ protected:
     V* value;
     Derived<V, R>* left;
     Derived<V, R>* right;
+    Derived<V, R>* parent; // added to allow inorder travel without allocating extra memory
     int height;
     R* returnVal; // This should be null (or equivalent) unless actively holding a required return value
 
 public:
+    iterator begin() {
+        return iterator(this);
+    }
+    iterator end() {
+        return iterator(nullptr);
+    }
+
     enum class Roll {
         noRoll,
         LL,
@@ -431,7 +439,53 @@ public:
         }
         return searchedValue;
     }
+};
 
+/**
+ *
+ * added Itertor class for inorder travel
+ * changes made- added parent pointer to AbstractAVL structure,
+ * we now need to make sure to properly set a parent in the tree methods (insert and delete)
+ */
+template <typename Derived, typename V, typename R>
+class AbstractAVL::Iterator{
+    AbstractAVL* current;
 
+    // finds the left most node (minimal value);
+    void FindLeft(AbstractAVL* node) {
+        while (node && node->left) {
+            node = node->left;
+        }
+        return node;
+    }
+    // finds the next node in inorder travel
+    AbstractAVL* findNext(AbstractAVL* node) {
+        if (node->right) {
+            // If there is a right subtree, the next node is the leftmost node in that subtree
+            return findLeft(node->right);
+        }
+        // Otherwise, move up to the parent until the node is a left child
+        AbstractAVL* parent = node->parent;
+        while (parent && node == parent->right) {
+            node = parent;
+            parent = parent->parent;
+        }
+        return parent;
+    }
 
+public:
+    iterator(AbstractAVL* root = nullptr) : current(findLeft(root)) {}
+    V& operator*() const {
+        return current->value;
+    }
+    iterator& operator++() {
+        current = findNext(current);
+        return *this;
+    }
+    bool operator==(const iterator& other) const {
+        return current == other.current;
+    }
+    bool operator!=(const iterator& other) const {
+        return !(*this == other);
+    }
 };
