@@ -1,8 +1,9 @@
 #pragma once
 #include "ProjectFiles.h"
 #include <cassert>
+#define NULL_ID -1
 
-class Horse : public IndexAble{
+class Horse : public IndexAble<Horse>, public TraceAble<Horse>{
 private:
     int horseId;
     int speed;
@@ -34,7 +35,7 @@ public:
         assert((this->followsInsertion == otherHerdInsertions)&&(this->herdID == followedHorse->herdID));
         return false;
     }
-    bool sameHerd();
+    inline bool sameHerd(Horse* otherHorse){return this->herdID == otherHorse->herdID;}
     void follow(Horse* leader){
         assert(leader->herdID == this->herdID);
         this->follows = leader;
@@ -60,6 +61,19 @@ public:
         bool checkNext = this->follows->inCircularReferance(--jumps);
         this->markChecked();
         return checkNext;
+    }
+
+    /**
+     * return true if left herd,
+     * false if was not in a herd
+     */
+    bool leaveHerd(){
+        if (this->herdID == NULL_ID){
+            return false;
+        }
+        this->herdID = NULL_ID;
+        ++(this->herdInsertions);
+        return true;
     }
     
 

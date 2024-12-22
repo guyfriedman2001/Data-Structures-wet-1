@@ -10,3 +10,4 @@
 #include "Herd.h"
 #include "HorseMap.h"
 #include "HorseTree.h"
+#include "TraceAble.h"

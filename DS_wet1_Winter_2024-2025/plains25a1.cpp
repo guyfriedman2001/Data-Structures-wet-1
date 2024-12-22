@@ -76,16 +76,30 @@ StatusType Plains::leave_herd(int horseId)
      * call function of leave herd from horse or whatever - still need to make it
      * if herd is now empty, remove it from non empty herds and add it back to empty herds
      */
-    return StatusType::FAILURE;
+    Horse* horseToLeave = this->allHorses->find(horseId);
+    if (horseToLeave == nullptr){
+        return StatusType::FAILURE;
+    }
+    bool succes = horseToLeave->leaveHerd();
+    return (succes)?(StatusType::SUCCESS):(StatusType::FAILURE);
 }
 
 output_t<int> Plains::get_speed(int horseId)
 {
-    return 0;
+    Horse* horseToSpeed = this->allHorses->find(horseId);
+    if (horseToSpeed == nullptr){
+        return StatusType::FAILURE;
+    }
+    int speed = horseToSpeed->getSpeed();
+    return speed;
 }
 
 output_t<bool> Plains::leads(int horseId, int otherHorseId)
 {
+    Horse* firstHorse = this->allHorses->find(horseId);
+    if (firstHorse == nullptr){
+        return StatusType::FAILURE;
+    }
     return false;
 }
 
