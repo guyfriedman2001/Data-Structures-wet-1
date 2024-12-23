@@ -22,6 +22,7 @@ StatusType Plains::add_herd(int herdId)
     if (nonEmptyHerds.get(herdId) != nullptr){
         return StatusType::FAILURE;
     }
+    //TODO add check for if the herd exists in EmptyHerds
     Herd* newHerd = nullptr;
     try {
         newHerd = new Herd(herdId);
