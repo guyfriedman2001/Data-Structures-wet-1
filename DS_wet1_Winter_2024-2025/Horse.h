@@ -38,6 +38,7 @@ public:
         assert((this->followsInsertion == otherHerdInsertions)&&(this->herdID == followedHorse->herdID));
         return false;
     }
+    
     inline bool sameHerd(Horse* otherHorse){return this->herdID == otherHorse->herdID;}
 
     bool follow(Horse* leader){
@@ -48,7 +49,7 @@ public:
         this->followsInsertion = leader->herdInsertions;
         return true;
     }
-    
+
     Horse* getFollows();
     inline bool alreadyChecked(){return this->special_bool;}
     inline void markChecked(){this->special_bool = true;}

@@ -9,7 +9,7 @@ private:
 public:
     Herd(int id):herdId(id), herdMembers(nullptr), totalMembers(0){}
     ~Herd() = default;
-    int getID() const override{
+    int getID() const{
         return this->herdId;
     }
     void setMembers(Horse* rep);
