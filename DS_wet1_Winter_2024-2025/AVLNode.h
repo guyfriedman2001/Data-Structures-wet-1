@@ -38,20 +38,16 @@ protected:
     void insertRight(AVLNode<Value>* node) {
         if (!this->right) {
             this->right = node;
-            this->returnVal = insertionSucces();
         } else {
             this->right = this->right->insert(node);
-            this->returnVal = this->right->returnVal;
         }
     }
 
     void insertLeft(AVLNode<Value>* node) {
         if (!this->left) {
             this->left = node;
-            this->returnVal = insertionSucces();
         } else {
             this->left = this->left->insert(node);
-            this->returnVal = this->left->returnVal;
         }
     }
 
@@ -69,6 +65,20 @@ protected:
         int oldHeight = node->height;
         int newHeight = node->heightUpdate();
         bool thisNode = (oldHeight == newHeight);
+        return leftTree&&rightTree&&thisNode;
+    }
+
+    /**
+     * same as above
+     */
+    bool isBalanced(AVLNode<Value>* node){
+        if (node == nullptr){
+            return true;
+        }
+        bool leftTree = isBalanced(node->left);
+        bool rightTree = isBalanced(node->right);
+        int nodesBalance = node->balanceFactor();
+        bool thisNode = ((-1<=nodesBalance) && (nodesBalance<=1));
         return leftTree&&rightTree&&thisNode;
     }
 
@@ -126,7 +136,6 @@ protected:
         AVLNode<Value>* temp = this->left;
         this->left = temp->right;
         temp->right = this;
-        temp->updateReturnVal(this);
         return temp;
     }
 
@@ -144,7 +153,6 @@ protected:
         AVLNode<Value>* temp = this->right;
         this->right = temp->left;
         temp->left = this;
-        temp->updateReturnVal(this);
         return temp;
     }
 

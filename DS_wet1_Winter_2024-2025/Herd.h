@@ -1,11 +1,10 @@
 #pragma once
 #include "ProjectFiles.h"
-#include <cassert>
 
-class Herd : public IndexAble{
+class Herd { //: public IndexAble{
 private:
     int herdId;
-    HorseMap* herdMembers;
+    LinkedList<Horse> herdMembers;
     int totalMembers;
 public:
     Herd(int id):herdId(id), herdMembers(nullptr), totalMembers(0){}
@@ -18,10 +17,54 @@ public:
     bool operator==(const Herd& otherHerd) const;
     bool operator>(const Herd& otherHerd) const;
     bool operator<(const Herd& otherHerd) const;
-    StatusType add_horse(int horseId, int speed){
-        Horse newHorse(horseId,speed);
-        this->herdMembers = this->herdMembers->insert(newHorse);
-        StatusType temp = this->herdMembers->
+
+    bool add_horse(Horse* horse){
+        for (Horse* horses : herdMembers){
+            if (horse == horses){
+                return false;
+            }
+        }
+        herdMembers.add(horse);
+        ++(this->totalMembers);
+        return true;
+    }
+    
+    bool leads(int followerID, int leaderID){
+        Horse* follower = nullptr;
+        Horse* leader = nullptr;
+        for (Horse* horse : this->herdMembers){
+            horse->unCheck();
+            if (horse->getID() == followerID){
+                follower = horse;
+            }
+            if (horse->getID() == leaderID){
+                leader = horse;
+            }
+        }
+        if ((follower == nullptr)||(leader == nullptr)){
+            return false;
+        }
+        follower->inCircularReferance(this->totalMembers);
+        return leader->alreadyChecked();
+    }
+
+    bool can_run_together(){
+        int totalIndependant = 0;
+        for (Horse* horse : herdMembers){
+            horse->unCheck();
+            if (horse->independant()){
+                totalIndependant+=1;
+            }
+        }
+        if (totalIndependant != 1){
+            return false;
+        }
+        for (Horse* horse : herdMembers){
+            if (horse->inCircularReferance(this->totalMembers)){
+                return false;
+            }
+        }
+        return true;
     }
 };
 

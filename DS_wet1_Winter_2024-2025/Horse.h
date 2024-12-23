@@ -3,7 +3,7 @@
 #include <cassert>
 #define NULL_ID -1
 
-class Horse : public IndexAble<Horse>, public TraceAble<Horse>{
+class Horse { //: public IndexAble<Horse>, public TraceAble<Horse>{
 private:
     int horseId;
     int speed;
@@ -13,8 +13,11 @@ private:
     int followsInsertion;
     bool special_bool;
 public:
-    int getID() const override{
+    int getID() const{
         return this->horseId;
+    }
+    int getHerdID(){
+        return this->herdID;
     }
     Horse(int id, int speed);
     ~Horse() = default;
@@ -36,11 +39,16 @@ public:
         return false;
     }
     inline bool sameHerd(Horse* otherHorse){return this->herdID == otherHorse->herdID;}
-    void follow(Horse* leader){
-        assert(leader->herdID == this->herdID);
+
+    bool follow(Horse* leader){
+        if(!(this->sameHerd(leader))){
+            return false;
+        }
         this->follows = leader;
         this->followsInsertion = leader->herdInsertions;
+        return true;
     }
+    
     Horse* getFollows();
     inline bool alreadyChecked(){return this->special_bool;}
     inline void markChecked(){this->special_bool = true;}

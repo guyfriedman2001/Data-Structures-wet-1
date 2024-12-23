@@ -25,9 +25,9 @@ private:
     //
     // Here you may add anything you want
     //
-    HorseTree* allHorses;
-    HorseMap* nonEmptyHerds; //FIXME change type to pointer to herd tree
-    HorseMap* emptyHerds; //FIXME change type to pointer to herd tree
+    AVL<Horse> allHorses;
+    AVL<Herd> nonEmptyHerds; //FIXME change type to pointer to herd tree
+    AVL<Herd> emptyHerds; //FIXME change type to pointer to herd tree
 
     
 public:

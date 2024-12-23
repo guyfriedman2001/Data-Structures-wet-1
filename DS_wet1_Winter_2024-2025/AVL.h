@@ -8,9 +8,9 @@ protected:
     AVLNode<Value>* head;
 
 public:
-    virtual AVLNode(V& value):head(AVLNode<Value>(value)){}
-    virtual AVLNode():head(nullptr){}
-    virtual ~AVLNode(){
+    virtual AVL(Value& value):head(AVLNode<Value>(value)){} //FIXME
+    virtual AVL():head(nullptr){}
+    virtual ~AVL(){
         delete head;
     }
 
@@ -25,6 +25,7 @@ public:
             return false;
         }
         this->head = this->head->insert(value);
+        assert(this->verifyTree());
         return true;
     }
 
@@ -37,14 +38,25 @@ public:
             return false;
         }
         this->head = this->head->deleteNode(index);
+        assert(this->verifyTree());
         return true;
     }
 
     Value* get(int index){
+        assert(this->verifyTree());
         if (this->head == nullptr){
             return nullptr;
         }
         return this->head->find(index);
+    }
+
+    /**
+     * this function will be used for debugging
+     */
+    bool verifyTree(){
+        bool heightVerified = AVLNode::heightVerified(this->head);
+        bool balanceVerified = AVLNode::isBalanced(this->head);
+        return heightVerified && balanceVerified;
     }
 
 };
