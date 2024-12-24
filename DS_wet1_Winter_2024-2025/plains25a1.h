@@ -26,8 +26,8 @@ private:
     // Here you may add anything you want
     //
     AVL<Horse> allHorses;
-    AVL<Herd> nonEmptyHerds; //FIXME change type to pointer to herd tree
-    AVL<Herd> emptyHerds; //FIXME change type to pointer to herd tree
+    AVL<Herd> nonEmptyHerds;
+    AVL<Herd> emptyHerds;
 
     
 public:

@@ -1,6 +1,8 @@
 #pragma once
 #include <cassert>
 #include "AVLNode.h"
+#define NULL_ID -1
+
 
 template <typename Value>
 class AVL {
@@ -18,6 +20,7 @@ public:
         int valueIndex = value.getID();
         if (this->head == nullptr){
             this->head = new AVLNode(Value);
+            if (!this->head){throw StatusType::ALLOCATION_ERROR;}
             return true;
         }
         Value* exists = this->head->find(valueIndex);

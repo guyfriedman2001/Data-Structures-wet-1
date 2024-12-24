@@ -38,7 +38,7 @@ public:
         assert((this->followsInsertion == otherHerdInsertions)&&(this->herdID == followedHorse->herdID));
         return false;
     }
-    
+
     inline bool sameHerd(Horse* otherHorse){return this->herdID == otherHorse->herdID;}
 
     bool follow(Horse* leader){
@@ -83,6 +83,11 @@ public:
         this->herdID = NULL_ID;
         ++(this->herdInsertions);
         return true;
+    }
+
+    void join_herd(Herd* herd){
+        this->herdID = herd->getID();
+        ++(this->herdInsertions);
     }
     
 

@@ -6,16 +6,19 @@
 
 Plains::Plains()
 {
-    
+    //how to do the initialisation list?
 }
 
 Plains::~Plains()
 {
-    
+    delete allHorses;
+    delete nonEmptyHerds;
+    delete emptyHerds;
 }
 
 StatusType Plains::add_herd(int herdId)
 {
+    try {
     if (herdId <= 0){
         return StatusType::INVALID_INPUT;
     }
@@ -31,6 +34,9 @@ StatusType Plains::add_herd(int herdId)
     }
     bool insertionWorked = emptyHerds.insert(*newHerd);
     return (insertionWorked)?(StatusType::SUCCESS):(StatusType::FAILURE);
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 StatusType Plains::remove_herd(int herdId)
@@ -41,6 +47,7 @@ StatusType Plains::remove_herd(int herdId)
 
 StatusType Plains::add_horse(int horseId, int speed)
 {
+    try {
     if (horseId <= 0){
         return StatusType::INVALID_INPUT;
     }
@@ -58,31 +65,45 @@ StatusType Plains::add_horse(int horseId, int speed)
     }
     bool operationWorked = allHorses.insert(*newHorse);
     return (operationWorked)?(StatusType::SUCCESS):(StatusType::FAILURE);
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
-StatusType Plains::join_herd(int horseId, int herdId) //TODO
+StatusType Plains::join_herd(int horseId, int herdId)
 {
+    try {
     if ((horseId <= 0)||(herdId <= 0)){return StatusType::INVALID_INPUT;}
 
     Horse* sooson = allHorses.get(horseId);
 
     if (sooson == nullptr){return StatusType::FAILURE;}
-    
+
     Herd* eder = emptyHerds.get(herdId);
     if (eder != nullptr){
         emptyHerds.remove(herdId); //FIXME check that horse is not in a herd
-        //add code here
+        try {
+            eder = new Herd(herdId);
+        } catch (...){
+            return StatusType::ALLOCATION_ERROR;
+        }
+        eder->add_horse(sooson);
+        nonEmptyHerds.insert(*eder);
     }
     if (eder == nullptr){
         eder = nonEmptyHerds.get(herdId);
     }
     if (eder == nullptr){return StatusType::FAILURE;}
-    eder->addHorse(sooson); //TODO make addHorse function in Herd, basically insert a pointer to the horse inside the Herd's HorseMap, and update ammount of horses in the herd horses counter
-    return StatusType::FAILURE;
+    eder->add_horse(sooson); //TODO make addHorse function in Herd, basically insert a pointer to the horse inside the Herd's HorseMap, and update ammount of horses in the herd horses counter
+    return StatusType::SUCCESS;
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 StatusType Plains::follow(int horseId, int horseToFollowId)
 {
+    try {
     if ((horseId == horseToFollowId)||(horseId <= 0)||(horseToFollowId <= 0)){
         return StatusType::INVALID_INPUT;
     }
@@ -96,11 +117,14 @@ StatusType Plains::follow(int horseId, int horseToFollowId)
     }
     bool operationWorked = firstHorse->follow(secondHorse);
     return (operationWorked)?(StatusType::SUCCESS):(StatusType::FAILURE);
-
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 StatusType Plains::leave_herd(int horseId)
 {
+    try {
     if (horseId <= 0){
         return StatusType::INVALID_INPUT;
     }
@@ -110,10 +134,14 @@ StatusType Plains::leave_herd(int horseId)
     }
     bool succes = horseToLeave->leaveHerd();
     return (succes)?(StatusType::SUCCESS):(StatusType::FAILURE);
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 output_t<int> Plains::get_speed(int horseId)
 {
+    try {
     if (horseId <= 0){
         return StatusType::INVALID_INPUT;
     }
@@ -123,10 +151,14 @@ output_t<int> Plains::get_speed(int horseId)
     }
     int speed = horseToSpeed->getSpeed();
     return speed;
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 output_t<bool> Plains::leads(int horseId, int otherHorseId)
 {
+    try {
     if ((horseId <= 0)||(otherHorseId <= 0)){
         return StatusType::INVALID_INPUT;
     }
@@ -145,10 +177,14 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId)
     }
     Herd* herd = nonEmptyHerds.get(HerdIDfirst);
     return herd->leads(horseId, otherHorseId);
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 output_t<bool> Plains::can_run_together(int herdId)
 {
+    try {
     if (herdId <= 0){
         return StatusType::INVALID_INPUT;
     }
@@ -157,4 +193,7 @@ output_t<bool> Plains::can_run_together(int herdId)
         return StatusType::FAILURE;
     }
     return herd->can_run_together();
+    } catch (StatusType e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }

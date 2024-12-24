@@ -1,14 +1,18 @@
 #pragma once
 #include "ProjectFiles.h"
+#define NULL_ID -1
 
-class Herd { //: public IndexAble{
+
+class Herd {
 private:
     int herdId;
-    LinkedList<Horse> herdMembers;
+    LinkedList<Horse*> herdMembers;
     int totalMembers;
 public:
-    Herd(int id):herdId(id), herdMembers(nullptr), totalMembers(0){}
-    ~Herd() = default;
+    Herd(int id):herdId(id), herdMembers(), totalMembers(0){}
+    ~Herd(){
+        delete herdMembers;
+    }
     int getID() const{
         return this->herdId;
     }
@@ -24,8 +28,9 @@ public:
                 return false;
             }
         }
-        herdMembers.add(horse);
+        herdMembers.insert(&horse);
         ++(this->totalMembers);
+        horse->join_herd(this);
         return true;
     }
     

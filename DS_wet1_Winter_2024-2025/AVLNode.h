@@ -1,5 +1,7 @@
 #pragma once
 #include <cassert>
+#define NULL_ID -1
+
 
 template <typename Value>
 class AVLNode {
@@ -292,7 +294,9 @@ public:
      * @return - the root of the balanced tree after the addition of the new value.
      */
     AVLNode<Value>* insert(V& value) { //removed const, we are deleting the value after runtime
-        return this->insert(&AVLNode<Value>(value));
+        AVLNode<Value> insertThis = new (noexcept) AVLNode<Value>(value);
+        if (!insertThis){throw StatusType::ALLOCATION_ERROR;}
+        return this->insert(&insertThis);
     }
     
     /**

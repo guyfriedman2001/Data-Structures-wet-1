@@ -1,3 +1,6 @@
+#define NULL_ID -1
+
+
 template <typename T>
 class Node {
     T* data;
@@ -8,7 +11,8 @@ public:
     explicit Node(T* data = nullptr, Node<T>* next = nullptr, Node<T>* previous = nullptr)
             : data(data), next(next), previous(previous) {}
     ~Node(){
-        delete data;
+        data = nullptr;
+        //delete data; //made this into a comment, because the linked list should not delete its members
     };
 
     Node<T>* getNext() {
@@ -35,9 +39,7 @@ public:
     }
     bool insert(T* type){
         Node<T> newnode = new (std::nothrow) Node<T>(type);
-        if (!newnode){
-            return false;
-        }
+        if (!newnode){throw StatusType::ALLOCATION_ERROR;}
         newnode->next = this->head;
         if (this->head != nullptr){
             this->head->previous = newnode;
@@ -46,9 +48,22 @@ public:
         return true;
     }
 
-//    bool remove(T* type){
-//        return false;
-//    }
+    bool remove(T* type){
+        for (Node<T> node : this->head){
+            if (node->data != type){continue;}
+            if (node->previous != nullptr){
+                node->previous->next = node->next;
+            }
+            if (node->next != nullptr){
+                node->next->previous = node->previous;
+            }
+            node->data = nullptr; //linked list should not delete held data
+            delete node;
+            return true;
+            
+        }
+        return false;
+    }
 
     class Iterator {
         Node<T>* current;
