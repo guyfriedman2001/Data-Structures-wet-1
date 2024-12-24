@@ -4,13 +4,22 @@
 #include "plains25a1.h"
 
 
-Plains::Plains()
-{
-    //how to do the initialisation list?
+Plains::Plains() : nonEmptyHerds(nullptr), emptyHerds(nullptr), allHorses(nullptr) {
+    try {
+        nonEmptyHerds = new AVLTree<Herd>();
+        emptyHerds = new AVLTree<Herd>();
+        allHorses = new AVLTree<Horse>();
+    } catch (...) {
+        delete allHorses;
+        delete nonEmptyHerds;
+        delete emptyHerds;
+        throw;
+    }
 }
 
 Plains::~Plains()
 {
+    // Assumes the AVLTree destructor handles its nodes and their values.
     delete allHorses;
     delete nonEmptyHerds;
     delete emptyHerds;
