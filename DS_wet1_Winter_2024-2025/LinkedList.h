@@ -1,4 +1,4 @@
-#define NULL_ID -1
+#define NULL_ID (-1)
 
 
 template <typename T>
@@ -58,7 +58,7 @@ public:
                 node->next->previous = node->previous;
             }
             node->data = nullptr; //linked list should not delete held data
-            delete node;
+            delete &node;
             return true;
             
         }

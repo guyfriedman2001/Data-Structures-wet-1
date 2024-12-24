@@ -2,13 +2,13 @@
 // However you need to implement all public Plains function, as provided below as a template
 
 #include "plains25a1.h"
-
+#include  "AVL.h"
 
 Plains::Plains() : nonEmptyHerds(nullptr), emptyHerds(nullptr), allHorses(nullptr) {
     try {
-        nonEmptyHerds = new AVLTree<Herd>();
-        emptyHerds = new AVLTree<Herd>();
-        allHorses = new AVLTree<Horse>();
+        nonEmptyHerds = new AVL<Herd>();
+        emptyHerds = new AVL<Herd>();
+        allHorses = new AVL<Horse>();
     } catch (...) {
         delete allHorses;
         delete nonEmptyHerds;
