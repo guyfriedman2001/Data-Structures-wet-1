@@ -1,6 +1,6 @@
 #pragma once
 #include "ProjectFiles.h"
-#define NULL_ID -1
+#define NULL_ID (-1)
 
 
 class Herd {
@@ -11,7 +11,7 @@ private:
 public:
     Herd(int id):herdId(id), herdMembers(), totalMembers(0){}
     ~Herd(){
-        delete herdMembers;
+        delete &herdMembers;
     }
     int getID() const{
         return this->herdId;

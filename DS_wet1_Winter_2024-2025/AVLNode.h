@@ -1,13 +1,15 @@
 #pragma once
 #include <cassert>
-#define NULL_ID -1
+#define NULL_ID (-1)
+#include  <iostream>
+#include "AVL.h"
+#define EMPTY_TREE_HEIGHT 0
 
+using std::cout;
 
 template <typename Value>
 class AVLNode {
 protected:
-    static constexpr int EMPTY_TREE_HEIGHT = 0;
-    static constexpr int MINUS_INFINITY = INT64_MIN;
     int index;
     Value* value;
     AVLNode<Value>* left;
@@ -24,7 +26,7 @@ public:
         RR
     };
 
-    AVLNode(V& value)
+    AVLNode(Value& value)
         : index(value.getId()), value(value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT + 1){}
 
     virtual ~AVLNode() {
@@ -175,7 +177,6 @@ protected:
      */
     void absorbNode(AVLNode<Value>* nodeToAbsorb){
         assert(!this->isLeaf());
-        this->deleteValue{};
         this->index = nodeToAbsorb->index;
         delete this->value;
         this->value = nodeToAbsorb->value;
@@ -267,7 +268,7 @@ protected:
     }
 
     AVLNode<Value>* deleteThis() { //return the sub tree of 'this' without the node of 'this'.
-        this->deleteValue();
+        delete this->value;
         if (this->isLeaf()) {
             delete this;
             return nullptr;
@@ -293,8 +294,8 @@ public:
      * @param value - value of the node to be inserted.
      * @return - the root of the balanced tree after the addition of the new value.
      */
-    AVLNode<Value>* insert(V& value) { //removed const, we are deleting the value after runtime
-        AVLNode<Value> insertThis = new (noexcept) AVLNode<Value>(value);
+    AVLNode<Value>* insert(Value& value) { //removed const, we are deleting the value after runtime
+        AVLNode<Value>* insertThis = new (std::nothrow) AVLNode<Value>(value);
         if (!insertThis){throw StatusType::ALLOCATION_ERROR;}
         return this->insert(&insertThis);
     }
@@ -310,8 +311,7 @@ public:
         int thisIndex = this->index;
 
         if (nodeIndex == thisIndex) {
-            throw "inserted node with same index as existing node";
-            this->sameIndex(node);
+            cout << "inserted node with same index as existing node";
             delete node;
             return this;
         }
@@ -332,8 +332,9 @@ public:
      * @param value - value to be deleted/ removed from the tree.
      * @return - the balanced tree without the removed value.
      */
-    AVLNode<Value>* deleteNode(V& value) {
-        return this->deleteNode(value.getId());
+    AVLNode<Value>* deleteNode(Value& value) {
+        int toDelete = value.getId();
+        return this->deleteNode(toDelete);
     }
 
     /**

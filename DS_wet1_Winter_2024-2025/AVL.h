@@ -1,7 +1,8 @@
 #pragma once
 #include <cassert>
 #include "AVLNode.h"
-#define NULL_ID -1
+#include <new>
+#define NULL_ID (-1)
 
 
 template <typename Value>
@@ -10,8 +11,8 @@ protected:
     AVLNode<Value>* head;
 
 public:
-    virtual AVL(Value& value):head(AVLNode<Value>(value)){} //FIXME
-    virtual AVL():head(nullptr){}
+    AVL(Value& value):head(AVLNode<Value>(value)){} //FIXME
+    AVL():head(nullptr){}
     virtual ~AVL(){
         delete head;
     }
@@ -19,7 +20,7 @@ public:
     bool insert(Value& value){
         int valueIndex = value.getID();
         if (this->head == nullptr){
-            this->head = new (noexcept) AVLNode(Value);
+            this->head = new (std::nothrow) AVLNode<Value>(value);
             if (!this->head){throw StatusType::ALLOCATION_ERROR;}
             return true;
         }
@@ -57,8 +58,8 @@ public:
      * this function will be used for debugging
      */
     bool verifyTree(){
-        bool heightVerified = AVLNode::heightVerified(this->head);
-        bool balanceVerified = AVLNode::isBalanced(this->head);
+        bool heightVerified = AVLNode<Value>::heightVerified(this->head);
+        bool balanceVerified = AVLNode<Value>::isBalanced(this->head);
         return heightVerified && balanceVerified;
     }
 
