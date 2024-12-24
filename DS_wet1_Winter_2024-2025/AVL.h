@@ -19,7 +19,7 @@ public:
     bool insert(Value& value){
         int valueIndex = value.getID();
         if (this->head == nullptr){
-            this->head = new AVLNode(Value);
+            this->head = new (noexcept) AVLNode(Value);
             if (!this->head){throw StatusType::ALLOCATION_ERROR;}
             return true;
         }
