@@ -25,7 +25,7 @@ public:
     Horse(int id, int speed) : horseId(id), speed(speed), herdID(NULL_ID), herdInsertions(0),
     follows(nullptr), followsInsertion(0), special_bool(false){}
     ~Horse() = default;
-    int getSpeed() const;
+    int getSpeed() const{ return this->speed;}
     void setFollow(int horseToFollow);
     void setHerd(int herdId);
 // comparison operators overload for use in tree methods.
@@ -33,8 +33,8 @@ public:
     bool operator>(const Horse& otherHorse) const;
     bool operator<(const Horse& otherHorse) const;
     bool independant(){
-        Horse* followedHorse;
-        if ((followedHorse = this->follows) == nullptr){return true;}
+        Horse* followedHorse = this->follows;
+        if (followedHorse == nullptr){return true;}
         int otherHerdInsertions = followedHorse->herdInsertions;
         //if the horse that 'this' follows has moved a herd since
         //'this' started following it.
@@ -66,7 +66,7 @@ public:
     bool inCircularReferance(int jumps){
         if (jumps < 0){return true;}
         bool maybeLeader = this->independant();
-        bool checkedNext = this->follows->alreadyChecked();
+        bool checkedNext = (maybeLeader)?true:this->follows->alreadyChecked();
         if (maybeLeader||checkedNext){
             this->markChecked();
             return false;

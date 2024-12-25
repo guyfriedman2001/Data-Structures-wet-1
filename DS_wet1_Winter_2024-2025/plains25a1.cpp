@@ -2,7 +2,7 @@
 // However you need to implement all public Plains function, as provided below as a template
 
 #include "plains25a1.h"
-#include  "AVL.h"
+#include  "ProjectFiles.h"
 
 Plains::Plains() : allHorses(), nonEmptyHerds(), emptyHerds() {}
 //Plains::Plains() {
@@ -43,7 +43,7 @@ StatusType Plains::add_herd(int herdId)
     } catch (...) {
         return StatusType::ALLOCATION_ERROR;
     }
-    bool insertionWorked = emptyHerds.insert(*newHerd);
+    bool insertionWorked = emptyHerds.insert(newHerd, herdId);
     return (insertionWorked)?(StatusType::SUCCESS):(StatusType::FAILURE);
     } catch (StatusType e){
         return StatusType::ALLOCATION_ERROR;
@@ -74,7 +74,7 @@ StatusType Plains::add_horse(int horseId, int speed)
     } catch (...) {
         return StatusType::ALLOCATION_ERROR;
     }
-    bool operationWorked = allHorses.insert(*newHorse);
+    bool operationWorked = allHorses.insert(newHorse,horseId);
     return (operationWorked)?(StatusType::SUCCESS):(StatusType::FAILURE);
     } catch (StatusType e){
         return StatusType::ALLOCATION_ERROR;
@@ -99,7 +99,7 @@ StatusType Plains::join_herd(int horseId, int herdId)
             return StatusType::ALLOCATION_ERROR;
         }
         eder->add_horse(sooson);
-        nonEmptyHerds.insert(*eder);
+        nonEmptyHerds.insert(eder,herdId);
     }
     if (eder == nullptr){
         eder = nonEmptyHerds.get(herdId);
@@ -122,7 +122,7 @@ StatusType Plains::follow(int horseId, int horseToFollowId)
     if (firstHorse == nullptr){
         return StatusType::FAILURE;
     }
-    Horse* secondHorse = allHorses.get(horseId);
+    Horse* secondHorse = allHorses.get(horseToFollowId);
     if (secondHorse == nullptr){
         return StatusType::FAILURE;
     }

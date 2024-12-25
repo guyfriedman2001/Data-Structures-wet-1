@@ -1,5 +1,6 @@
+#pragma once
 #define NULL_ID (-1)
-
+#include  <new>
 
 template <typename T>
 class Node {
@@ -11,8 +12,9 @@ public:
     explicit Node(T* data = nullptr, Node<T>* next = nullptr, Node<T>* previous = nullptr)
             : data(data), next(next), previous(previous) {}
     ~Node(){
+        delete next;
+        previous = nullptr;
         data = nullptr;
-        //delete data; //made this into a comment, because the linked list should not delete its members
     };
 
     Node<T>* getNext() {
@@ -38,6 +40,9 @@ private:
     Node<T>* head;
 public:
     LinkedList() : head(nullptr){}
+
+    /**
+     *
     ~LinkedList() {
         Node<T>* current = head;
         while (current) {
@@ -46,15 +51,19 @@ public:
             current = next;
         }
     }
+     */
+    ~LinkedList() = default; //{delete head;}
     bool insert(T* type){
-//        Node<T> newnode = new (std::nothrow) Node<T>(type);
-        Node<T> newnode;
-        if (!newnode.getData()){throw StatusType::ALLOCATION_ERROR;}
-        newnode.setNext(this->head);
-        if (this->head != nullptr){
-            this->head->setPrevious(&newnode);
+        Node<T>* newnode = new (std::nothrow) Node<T>(type);
+        if (!newnode) {
+            throw StatusType::ALLOCATION_ERROR;
         }
-        this->head = &newnode;
+
+        newnode->setNext(this->head);
+        if (this->head != nullptr){
+            this->head->setPrevious(newnode);
+        }
+        this->head = newnode;
         return true;
     }
 

@@ -2,9 +2,10 @@
 #include <cassert>
 #define NULL_ID (-1)
 #include  <iostream>
-#include "AVL.h"
-#define EMPTY_TREE_HEIGHT 0
-
+//#include "AVL.h"
+#include "wet1util.h"
+#define EMPTY_TREE_HEIGHT -1
+#include <new>
 using std::cout;
 
 template <typename Value>
@@ -26,14 +27,10 @@ public:
         RR
     };
 
-    AVLNode(Value& value)
-        : index(value.getID()), value(&value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT + 1){}
+    AVLNode(Value* value, int id)
+        : index(id), value(value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT+1){}
 
-    virtual ~AVLNode() {
-        delete left;
-        delete right;
-        delete value;
-    }
+    virtual ~AVLNode() = default; //{delete left;delete right;delete value;}
 
     /**
      * this function will be used for debugging in AVL class
@@ -41,13 +38,15 @@ public:
      * values
      */
     bool heightVerified(){
-        if (this == nullptr){
-            return true;
+        //if (node == nullptr){return true;}
+        bool leftTree = true;
+        if (this->left != nullptr) {
+            leftTree = this->left->heightVerified();
         }
-        bool leftTree = this->left->heightVerified();
-        bool rightTree = this->right->heightVerified();
-//        bool leftTree = heightVerified(this->left);
-//        bool rightTree = heightVerified(this->right);
+        bool rightTree = true;
+        if (this->right != nullptr) {
+            rightTree = this->right->heightVerified();
+        }
         int oldHeight = this->height;
         int newHeight = this->heightUpdate();
         bool thisNode = (oldHeight == newHeight);
@@ -58,11 +57,15 @@ public:
      * same as above
      */
     bool isBalanced(){
-        if (this == nullptr){
-            return true;
+        //no need for bull check, taken care of by AVLTree
+        bool leftTree = true;
+        if (this->left != nullptr) {
+            leftTree = this->left->isBalanced();
         }
-        bool leftTree = this->left->isBalanced();
-        bool rightTree = this->right->isBalanced();
+        bool rightTree = true;
+        if (this->right != nullptr) {
+            rightTree = this->right->isBalanced();
+        }
         int nodesBalance = this->balanceFactor();
         bool thisNode = ((-1<=nodesBalance) && (nodesBalance<=1));
         return leftTree&&rightTree&&thisNode;
@@ -136,7 +139,8 @@ protected:
             case Roll::RR:
                 return this->RR();
             default:
-                throw "Problem in Balance switch case";
+                cout << "Problem in Balance switch case";
+                assert(false);
         }
     }
 
@@ -152,7 +156,7 @@ protected:
         return this->height;
     }
 
-    int balanceFactor() const {
+    int balanceFactor() {
         this->heightUpdate(); //make sure height is updated
         int leftHeight = this->left ? this->left->height : EMPTY_TREE_HEIGHT;
         int rightHeight = this->right ? this->right->height : EMPTY_TREE_HEIGHT;
@@ -173,6 +177,8 @@ protected:
         AVLNode<Value>* temp = this->left;
         this->left = temp->right;
         temp->right = this;
+        this->heightUpdate();
+        temp->heightUpdate();
         return temp;
     }
 
@@ -190,6 +196,8 @@ protected:
         AVLNode<Value>* temp = this->right;
         this->right = temp->left;
         temp->left = this;
+        this->heightUpdate();
+        temp->heightUpdate();
         return temp;
     }
 
@@ -209,7 +217,7 @@ protected:
      * absorb a given node into 'this', effectively 'deleting' 'this'.
      */
     void absorbNode(AVLNode<Value>* nodeToAbsorb){
-        assert(!this->isLeaf());
+        assert(!(this->isLeaf()));
         this->index = nodeToAbsorb->index;
         delete this->value;
         this->value = nodeToAbsorb->value;
@@ -265,6 +273,7 @@ protected:
         }
         AVLNode<Value>* temp = this->left;
         this->left = temp->right;
+        temp->right = nullptr;
         assert(temp->left == nullptr);
         return temp;
     }
@@ -275,6 +284,7 @@ protected:
      * @return - the head of the balanced sub tree
      */
     AVLNode<Value>* updatePath(int index){ //FIXME function takes O(n) time!
+        assert(false); //this function should not be called
         int thisIndex = this->index;
         int fixIndex = index;
         assert(thisIndex != fixIndex);
@@ -292,7 +302,7 @@ protected:
      * 
      * @return - the head of the balanced sub tree
      */
-    AVLNode<Value>* updateLeftPath(){ //FIXME function takes O(n) time!
+    AVLNode<Value>* updateLeftPath(){
         if (this->left == nullptr){
             return this->Balance();
         }
@@ -327,8 +337,8 @@ public:
      * @param value - value of the node to be inserted.
      * @return - the root of the balanced tree after the addition of the new value.
      */
-    AVLNode<Value>* insert(Value& value) { //removed const, we are deleting the value after runtime
-        AVLNode<Value>* insertThis = new (std::nothrow) AVLNode<Value>(value);
+    AVLNode<Value>* insert(Value* value, int id) { //removed const, we are deleting the value after runtime
+        AVLNode<Value>* insertThis = new (std::nothrow) AVLNode<Value>(value,id);
         if (!insertThis){throw StatusType::ALLOCATION_ERROR;}
         return this->insert(insertThis);
     }
@@ -365,10 +375,15 @@ public:
      * @param value - value to be deleted/ removed from the tree.
      * @return - the balanced tree without the removed value.
      */
-    AVLNode<Value>* deleteNode(Value& value) {
+    /**
+     *
+    AVLNode<Value>* deleteNode(Value* value) {
         int toDelete = value.getId();
         return this->deleteNode(toDelete);
     }
+     *
+     */
+
 
     /**
      * remove a node from the tree of 'this', return the balanced tree, with returnVal updated at
