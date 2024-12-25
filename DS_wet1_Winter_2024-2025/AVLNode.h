@@ -27,7 +27,7 @@ public:
     };
 
     AVLNode(Value& value)
-        : index(value.getId()), value(value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT + 1){}
+        : index(value.getID()), value(&value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT + 1){}
 
     virtual ~AVLNode() {
         delete left;
@@ -35,9 +35,42 @@ public:
         delete value;
     }
 
+    /**
+     * this function will be used for debugging in AVL class
+     * for example - assert(heightVerified()) after inserting or deleting
+     * values
+     */
+    bool heightVerified(){
+        if (this == nullptr){
+            return true;
+        }
+        bool leftTree = this->left->heightVerified();
+        bool rightTree = this->right->heightVerified();
+//        bool leftTree = heightVerified(this->left);
+//        bool rightTree = heightVerified(this->right);
+        int oldHeight = this->height;
+        int newHeight = this->heightUpdate();
+        bool thisNode = (oldHeight == newHeight);
+        return leftTree&&rightTree&&thisNode;
+    }
+
+    /**
+     * same as above
+     */
+    bool isBalanced(){
+        if (this == nullptr){
+            return true;
+        }
+        bool leftTree = this->left->isBalanced();
+        bool rightTree = this->right->isBalanced();
+        int nodesBalance = this->balanceFactor();
+        bool thisNode = ((-1<=nodesBalance) && (nodesBalance<=1));
+        return leftTree&&rightTree&&thisNode;
+    }
 
 
 protected:
+    template<typename T>
     friend class AVL;
     void insertRight(AVLNode<Value>* node) {
         if (!this->right) {
@@ -55,36 +88,36 @@ protected:
         }
     }
 
-    /**
-     * this function will be used for debugging in AVL class
-     * for example - assert(heightVerified()) after inserting or deleting
-     * values
-     */
-    bool heightVerified(AVLNode<Value>* node){
-        if (node == nullptr){
-            return true;
-        }
-        bool leftTree = heightVerified(node->left);
-        bool rightTree = heightVerified(node->right);
-        int oldHeight = node->height;
-        int newHeight = node->heightUpdate();
-        bool thisNode = (oldHeight == newHeight);
-        return leftTree&&rightTree&&thisNode;
-    }
-
-    /**
-     * same as above
-     */
-    bool isBalanced(AVLNode<Value>* node){
-        if (node == nullptr){
-            return true;
-        }
-        bool leftTree = isBalanced(node->left);
-        bool rightTree = isBalanced(node->right);
-        int nodesBalance = node->balanceFactor();
-        bool thisNode = ((-1<=nodesBalance) && (nodesBalance<=1));
-        return leftTree&&rightTree&&thisNode;
-    }
+//    /**
+//     * this function will be used for debugging in AVL class
+//     * for example - assert(heightVerified()) after inserting or deleting
+//     * values
+//     */
+//    bool heightVerified(AVLNode<Value>* node){
+//        if (node == nullptr){
+//            return true;
+//        }
+//        bool leftTree = heightVerified(node->left);
+//        bool rightTree = heightVerified(node->right);
+//        int oldHeight = node->height;
+//        int newHeight = node->heightUpdate();
+//        bool thisNode = (oldHeight == newHeight);
+//        return leftTree&&rightTree&&thisNode;
+//    }
+//
+//    /**
+//     * same as above
+//     */
+//    bool isBalanced(AVLNode<Value>* node){
+//        if (node == nullptr){
+//            return true;
+//        }
+//        bool leftTree = isBalanced(node->left);
+//        bool rightTree = isBalanced(node->right);
+//        int nodesBalance = node->balanceFactor();
+//        bool thisNode = ((-1<=nodesBalance) && (nodesBalance<=1));
+//        return leftTree&&rightTree&&thisNode;
+//    }
 
 
 
@@ -126,7 +159,7 @@ protected:
         return leftHeight - rightHeight;
     }
 
-    Roll getRoll() const {
+    Roll getRoll() {
         this->heightUpdate(); //make sure height is updated
         int balance = this->balanceFactor();
         if (-1 <= balance && balance <= 1) return Roll::noRoll;
@@ -273,7 +306,7 @@ protected:
             delete this;
             return nullptr;
         }
-        if (this->oneChild){
+        if (this->oneChild()){
             this->absorbChild();
         }
         if (this->twoChildern()){
@@ -297,7 +330,7 @@ public:
     AVLNode<Value>* insert(Value& value) { //removed const, we are deleting the value after runtime
         AVLNode<Value>* insertThis = new (std::nothrow) AVLNode<Value>(value);
         if (!insertThis){throw StatusType::ALLOCATION_ERROR;}
-        return this->insert(&insertThis);
+        return this->insert(insertThis);
     }
     
     /**

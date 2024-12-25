@@ -1,8 +1,10 @@
 #pragma once
 #include "ProjectFiles.h"
-#include "Herd.h"
+//#include "Herd.h"
 #include <cassert>
 #define NULL_ID (-1)
+
+class Herd; //added as forward declaration due to circular inclusion
 
 class Horse { //: public IndexAble<Horse>, public TraceAble<Horse>{
 private:
@@ -20,7 +22,7 @@ public:
     int getHerdID(){
         return this->herdID;
     }
-    Horse(int id, int speed) : horseId(id), speed(speed), herdID(NULL_ID(-1)), herdInsertions(0),
+    Horse(int id, int speed) : horseId(id), speed(speed), herdID(NULL_ID), herdInsertions(0),
     follows(nullptr), followsInsertion(0), special_bool(false){}
     ~Horse() = default;
     int getSpeed() const;
@@ -87,11 +89,9 @@ public:
         return true;
     }
 
-    void join_herd(Herd* herd){
-        this->herdID = herd->getID();
-        ++(this->herdInsertions);
-    }
-    
-
-
+    void join_herd(Herd* herd);
+//    void join_herd(Herd* herd){
+//        this->herdID = herd->getID();
+//        ++(this->herdInsertions);
+//    }
 };

@@ -21,6 +21,15 @@ public:
     Node<T>* getPrevious() {
         return this->previous;
     }
+    T* getData() {
+        return this->data;
+    }
+    void setNext(Node<T>* newNext) {
+        this->next = newNext;
+    }
+    void setPrevious(Node<T>* newPrevious) {
+        this->previous = newPrevious;
+    }
 };
 
 template <typename T>
@@ -32,19 +41,20 @@ public:
     ~LinkedList() {
         Node<T>* current = head;
         while (current) {
-            Node<T> *next = current->next;
+            Node<T> *next = current->getNext();
             delete current;
             current = next;
         }
     }
     bool insert(T* type){
-        Node<T> newnode = new (std::nothrow) Node<T>(type);
-        if (!newnode){throw StatusType::ALLOCATION_ERROR;}
-        newnode->next = this->head;
+//        Node<T> newnode = new (std::nothrow) Node<T>(type);
+        Node<T> newnode;
+        if (!newnode.getData()){throw StatusType::ALLOCATION_ERROR;}
+        newnode.setNext(this->head);
         if (this->head != nullptr){
-            this->head->previous = newnode;
+            this->head->setPrevious(&newnode);
         }
-        this->head = newnode;
+        this->head = &newnode;
         return true;
     }
 
@@ -70,10 +80,10 @@ public:
     public:
         explicit Iterator(Node<T>* node = nullptr) : current(node) {}
         T& operator*() const {
-            return *(current->data);
+            return *(current->getData());
         }
         Iterator& operator++() {
-            if (current) current = current->next;
+            if (current) current = current->getNext();
             return *this;
         }
         Iterator& operator--() {

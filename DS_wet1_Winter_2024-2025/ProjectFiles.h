@@ -12,7 +12,7 @@
 //#include "HorseTree.h"
 //#include "TraceAble.h"
 #include "AVL.h"
-#include "LinkedList.h"
+//#include "LinkedList.h"
 #include <cassert>
 #include <new>
 #include <iostream>

@@ -24,6 +24,11 @@ bool Horse::operator<(const Horse& otherHorse) const{
     return this->horseId < otherHorse.horseId;
 }
 
+void Horse::join_herd(Herd* herd){
+    this->herdID = herd->getID();
+    ++(this->herdInsertions);
+}
+
 
 /**
  *

@@ -1,0 +1,6 @@
+[submodule "DS_wet1_Winter_2024-2025/TechnionDataStructures"]
+	path = DS_wet1_Winter_2024-2025/TechnionDataStructures
+	url = https://github.com/PNone/TechnionDataStructures.git
+[submodule "DS_wet1_Winter_2024-2025/MatamGenericTester"]
+	path = DS_wet1_Winter_2024-2025/MatamGenericTester
+	url = https://github.com/PNone/MatamGenericTester.git

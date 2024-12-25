@@ -1,7 +1,7 @@
 #pragma once
 #include "ProjectFiles.h"
+#include "LinkedList.h"
 #define NULL_ID (-1)
-
 
 class Herd {
 private:
@@ -9,7 +9,7 @@ private:
     LinkedList<Horse*> herdMembers;
     int totalMembers;
 public:
-    Herd(int id):herdId(id), herdMembers(), totalMembers(0){}
+    explicit Herd(int id):herdId(id), herdMembers(), totalMembers(0){}
     ~Herd(){
         delete &herdMembers;
     }

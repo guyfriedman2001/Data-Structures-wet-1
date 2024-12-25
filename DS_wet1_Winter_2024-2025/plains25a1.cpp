@@ -4,26 +4,28 @@
 #include "plains25a1.h"
 #include  "AVL.h"
 
-Plains::Plains() : nonEmptyHerds(nullptr), emptyHerds(nullptr), allHorses(nullptr) {
-    try {
-        nonEmptyHerds = new AVL<Herd>();
-        emptyHerds = new AVL<Herd>();
-        allHorses = new AVL<Horse>();
-    } catch (...) {
-        delete allHorses;
-        delete nonEmptyHerds;
-        delete emptyHerds;
-        throw;
-    }
-}
+Plains::Plains() : allHorses(), nonEmptyHerds(), emptyHerds() {}
+//Plains::Plains() {
+//    try {
+//        AVL<Herd> allHorses;
+//        AVL<Herd> nonEmptyHerds;
+//        AVL<Herd> emptyHerds;
+//    } catch (...) {
+//        delete allHorses;
+//        delete nonEmptyHerds;
+//        delete emptyHerds;
+//        throw;
+//    }
+//}
 
-Plains::~Plains()
-{
-    // Assumes the AVLTree destructor handles its nodes and their values.
-    delete allHorses;
-    delete nonEmptyHerds;
-    delete emptyHerds;
-}
+Plains::~Plains() = default;
+//Plains::~Plains()
+//{
+//    // Assumes the AVLTree destructor handles its nodes and their values.
+//    delete allHorses;
+//    delete nonEmptyHerds;
+//    delete emptyHerds;
+//}
 
 StatusType Plains::add_herd(int herdId)
 {

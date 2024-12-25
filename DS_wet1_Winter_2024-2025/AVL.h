@@ -47,7 +47,7 @@ public:
     }
 
     Value* get(int index){
-        assert(this->verifyTree());
+        //assert(this->verifyTree());
         if (this->head == nullptr){
             return nullptr;
         }
@@ -58,8 +58,10 @@ public:
      * this function will be used for debugging
      */
     bool verifyTree(){
-        bool heightVerified = AVLNode<Value>::heightVerified(this->head);
-        bool balanceVerified = AVLNode<Value>::isBalanced(this->head);
+        bool heightVerified = this->head->heightVerified();
+        bool balanceVerified = this->head->isBalanced();
+//        bool heightVerified = AVLNode<Value>::heightVerified(this->head);
+//        bool balanceVerified = AVLNode<Value>::isBalanced(this->head);
         return heightVerified && balanceVerified;
     }
 
