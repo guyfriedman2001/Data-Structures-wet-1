@@ -25,7 +25,24 @@ bool Horse::operator<(const Horse& otherHorse) const{
 
 void Horse::join_herd(Herd* herd){
     this->herdID = herd->getID();
+    this->herd = herd;
+    int prev = this->herdInsertions;
+    this->herdInsertions = prev + 1; //TODO double increment, because one may not be working properly
+    this->herdInsertions++;
+}
+
+bool Horse::leaveHerd(){
+    if (this->herd == nullptr){
+        return false;
+    }
+    this->herdID = NULL_ID;
+    this->herd->leave();
+    this->herd = nullptr;
+    this->follows = nullptr;
+    thisLink->removeYourself();
+    this->thisLink = nullptr;
     ++(this->herdInsertions);
+    return true;
 }
 
 

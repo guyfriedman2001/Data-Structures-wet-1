@@ -27,8 +27,10 @@ int main()
     
     // Execute all commands in file
     string op;
+    int i =1;
     while (cin >> op)
     {
+        ++i;
         if (!op.compare("add_herd")) {
             cin >> d1;
             print(op, obj->add_herd(d1));
@@ -67,7 +69,7 @@ int main()
         }
     }
 
-    // Quit 
+    // Quit
     delete obj;
     return 0;
 }

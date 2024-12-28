@@ -13,7 +13,9 @@ add_executable(MyExecutable
         AVLNode.h
         LinkedList.h
         AVLTree.h
-        main25a1.cpp)
+        main25a1.cpp
+        HorseTree.h
+        HorseNode.h)
 
 # Enable debugging symbols
 set(CMAKE_BUILD_TYPE Debug)

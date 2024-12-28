@@ -20,29 +20,49 @@ public:
     bool operator<(const Herd& otherHerd) const;
 
     bool add_horse(Horse* horse){
-        for (Horse horses : herdMembers){
-            if (*horse == horses){
-                return false;
-            }
-        }
+        assert(addHorseAssertHelper(horse));
         herdMembers.insert(horse);
         ++(this->totalMembers);
         horse->join_herd(this);
+        horse->setLink(this->herdMembers.getHead());
         return true;
+    }
+
+    bool addHorseAssertHelper(Horse* horse) {
+        Node<Horse>* curr = this->herdMembers.getHead();
+        Node<Horse>* last = this->herdMembers.getLast();
+        while (curr != last) {
+            Horse* horsy = curr->getData();
+            if (horsy == horse) {
+                return false;
+            }
+            curr = curr->getNext();
+        }
+        return true;
+    }
+
+    void leave() {
+        --(this->totalMembers);
     }
     
     bool leads(int followerID, int leaderID){
+        assert((followerID != leaderID)&&(followerID>0)&&(leaderID>0));
         Horse* follower = nullptr;
         Horse* leader = nullptr;
-        for (Horse horse : this->herdMembers){
-            horse.unCheck();
-            if (horse.getID() == followerID){
-                follower = &horse;
+        Node<Horse>* curr = this->herdMembers.getHead();
+        Node<Horse>* last = this->herdMembers.getLast();
+        while (curr != last) {
+            Horse* horse = curr->getData();
+            horse->unCheck();
+            if (horse->getID() == followerID) {
+                follower = horse;
             }
-            if (horse.getID() == leaderID){
-                leader = &horse;
+            if (horse->getID() == leaderID) {
+                leader = horse;
             }
+            curr = curr->getNext();
         }
+
         if ((follower == nullptr)||(leader == nullptr)){
             return false;
         }
@@ -52,21 +72,44 @@ public:
 
     bool can_run_together(){
         int totalIndependant = 0;
-        for (Horse horse : herdMembers){
-            horse.unCheck();
-            if (horse.independant()){
-                totalIndependant+=1;
+        Node<Horse>* curr = this->herdMembers.getHead();
+        Node<Horse>* last = this->herdMembers.getLast();
+        while (curr != last) {
+            Horse* horse = curr->getData();
+            horse->unCheck();
+            if (horse->independant()) {
+                totalIndependant++;
             }
+            curr = curr->getNext();
         }
         if (totalIndependant != 1){
             return false;
         }
-        for (Horse horse : herdMembers){
-            if (horse.inCircularReferance(this->totalMembers)){
+        curr = this->herdMembers.getHead();
+        last = this->herdMembers.getLast();
+        while (curr != last) {
+            Horse* horse = curr->getData();
+            if (horse->inCircularReferance(this->totalMembers)){
                 return false;
             }
+
+
+            curr = curr->getNext();
         }
+
+
         return true;
     }
 };
 
+/**
+    Node<Horse>* curr = this->herdMembers.getHead();
+        Node<Horse>* last = this->herdMembers.getLast();
+        while (curr != last) {
+            Horse* horse = curr->getData();
+
+
+
+            curr = curr->getNext();
+    }
+ */

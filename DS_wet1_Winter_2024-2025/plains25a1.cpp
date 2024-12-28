@@ -3,6 +3,9 @@
 
 #include "plains25a1.h"
 #include  "ProjectFiles.h"
+#define NOT_NULL(a) (a>0)
+#include <new>
+using std::bad_alloc;
 
 Plains::Plains() : allHorses(), nonEmptyHerds(), emptyHerds() {}
 //Plains::Plains() {
@@ -33,10 +36,9 @@ StatusType Plains::add_herd(int herdId)
     if (herdId <= 0){
         return StatusType::INVALID_INPUT;
     }
-    if (nonEmptyHerds.get(herdId) != nullptr){
+    if ((nonEmptyHerds.get(herdId) != nullptr)||(emptyHerds.get(herdId) != nullptr)){
         return StatusType::FAILURE;
     }
-    //TODO add check for if the herd exists in EmptyHerds
     Herd* newHerd = nullptr;
     try {
         newHerd = new Herd(herdId);
@@ -45,7 +47,7 @@ StatusType Plains::add_herd(int herdId)
     }
     bool insertionWorked = emptyHerds.insert(newHerd, herdId);
     return (insertionWorked)?(StatusType::SUCCESS):(StatusType::FAILURE);
-    } catch (StatusType e){
+    } catch (StatusType e ){
         return StatusType::ALLOCATION_ERROR;
     }
 }
@@ -81,7 +83,7 @@ StatusType Plains::add_horse(int horseId, int speed)
     }
 }
 
-StatusType Plains::join_herd(int horseId, int herdId)
+StatusType Plains::join_herd(int horseId, int herdId) //FIXME ADD PAIR
 {
     try {
     if ((horseId <= 0)||(herdId <= 0)){return StatusType::INVALID_INPUT;}
@@ -89,23 +91,25 @@ StatusType Plains::join_herd(int horseId, int herdId)
     Horse* sooson = allHorses.get(horseId);
 
     if (sooson == nullptr){return StatusType::FAILURE;}
+    if (sooson->getHerdID() > 0){return StatusType::FAILURE;}
 
     Herd* eder = emptyHerds.get(herdId);
     if (eder != nullptr){
-        emptyHerds.remove(herdId); //FIXME check that horse is not in a herd
+        emptyHerds.remove(herdId);
         try {
             eder = new Herd(herdId);
         } catch (...){
             return StatusType::ALLOCATION_ERROR;
         }
-        eder->add_horse(sooson);
+        eder->add_horse(sooson); //FIXME add pair changes
         nonEmptyHerds.insert(eder,herdId);
+        return StatusType::SUCCESS;
     }
     if (eder == nullptr){
         eder = nonEmptyHerds.get(herdId);
     }
     if (eder == nullptr){return StatusType::FAILURE;}
-    eder->add_horse(sooson); //TODO make addHorse function in Herd, basically insert a pointer to the horse inside the Herd's HorseMap, and update ammount of horses in the herd horses counter
+    eder->add_horse(sooson); //TODO modify for Pair changes
     return StatusType::SUCCESS;
     } catch (StatusType e){
         return StatusType::ALLOCATION_ERROR;
@@ -170,23 +174,25 @@ output_t<int> Plains::get_speed(int horseId)
 output_t<bool> Plains::leads(int horseId, int otherHorseId)
 {
     try {
-    if ((horseId <= 0)||(otherHorseId <= 0)){
+    if ((horseId <= 0)||(otherHorseId <= 0)||(horseId==otherHorseId)){
         return StatusType::INVALID_INPUT;
     }
     Horse* firstHorse = allHorses.get(horseId);
     if (firstHorse == nullptr){
         return StatusType::FAILURE;
     }
-    Horse* secondHorse = allHorses.get(horseId);
+    Horse* secondHorse = allHorses.get(otherHorseId);
     if (secondHorse == nullptr){
         return StatusType::FAILURE;
     }
+    //if ((firstHorse->getHerd() == nullptr)||(secondHorse->getHerd()==nullptr)) {return StatusType::FAILURE;}
     int HerdIDfirst = firstHorse->getHerdID();
     int HerdIDsecond = secondHorse->getHerdID();
     if (HerdIDfirst != HerdIDsecond){
         return false;
     }
-    Herd* herd = nonEmptyHerds.get(HerdIDfirst);
+    Herd* herd = firstHorse->getHerd();
+    if (herd == nullptr){return false;}
     return herd->leads(horseId, otherHorseId);
     } catch (StatusType e){
         return StatusType::ALLOCATION_ERROR;

@@ -1,9 +1,12 @@
 #pragma once
 #define NULL_ID (-1)
 #include  <new>
+#include "ProjectFiles.h"
 
 template <typename T>
 class Node {
+    //friend class LinkedList;
+    public:
     T* data;
     Node<T>* next;
     Node<T>* previous;
@@ -32,14 +35,32 @@ public:
     void setPrevious(Node<T>* newPrevious) {
         this->previous = newPrevious;
     }
+    void removeYourself() {
+        this->next->previous = this->previous;
+        this->previous->next = this->next;
+        this->next = nullptr;
+        this->previous = nullptr;
+        this->data = nullptr;
+        delete this;
+    }
 };
 
 template <typename T>
 class LinkedList{
 private:
     Node<T>* head;
+    Node<T>* tail;
+
 public:
-    LinkedList() : head(nullptr){}
+    LinkedList() {
+        this->head = new (std::nothrow) Node<T>();
+        this->tail = new (std::nothrow) Node<T>();
+        if (this->head == nullptr || this->tail == nullptr) {
+            throw StatusType::ALLOCATION_ERROR;
+        }
+        this->head->setNext(this->tail);
+        this->tail->setPrevious(this->head);
+    }
 
     /**
      *
@@ -52,23 +73,37 @@ public:
         }
     }
      */
-    ~LinkedList() = default; //{delete head;}
+
+    ~LinkedList() = default;
+    Node<T>* getHead() {
+        return this->head->getNext();
+    }
     bool insert(T* type){
         Node<T>* newnode = new (std::nothrow) Node<T>(type);
         if (!newnode) {
             throw StatusType::ALLOCATION_ERROR;
         }
+        this->head->next->previous = newnode;
+        newnode->setNext(this->head->getNext());
+        this->head->setNext(newnode);
+        newnode->setPrevious(this->head);
 
-        newnode->setNext(this->head);
-        if (this->head != nullptr){
-            this->head->setPrevious(newnode);
-        }
-        this->head = newnode;
         return true;
     }
 
+    Node<T>* getFirst() {
+        return this->head->getNext();
+    }
+
+    Node<T>* getLast() {
+        return this->tail;
+    }
+
     bool remove(T* type){
-        for (Node<T> node : this->head){
+        //for (Node<T> node : this->head){  ====== attempts to iterate over this->head directly, which is not iterable ======
+        for (Iterator it = begin(); it != end(); it++) {
+            Node<T>* node = it.current;
+
             if (node->data != type){continue;}
             if (node->previous != nullptr){
                 node->previous->next = node->next;
@@ -77,9 +112,8 @@ public:
                 node->next->previous = node->previous;
             }
             node->data = nullptr; //linked list should not delete held data
-            delete &node;
+            delete node; //====== changed from delete &node ======
             return true;
-            
         }
         return false;
     }
@@ -88,17 +122,17 @@ public:
         Node<T>* current;
     public:
         explicit Iterator(Node<T>* node = nullptr) : current(node) {}
-        T& operator*() const {
+        T& operator*() {
             return *(current->getData());
         }
         Iterator& operator++() {
             if (current) current = current->getNext();
             return *this;
         }
-        Iterator& operator--() {
-            if (current) current = current->previous;
-            return *this;
-        }
+//        Iterator& operator--() {
+//            if (current) current = current->previous;
+//            return *this;
+//        }
         bool operator==(const Iterator& other) const {
             return current == other.current;
         }
@@ -107,9 +141,9 @@ public:
         }
     };
     Iterator begin() {
-        return Iterator(head);
+        return Iterator(this->head->getNext());
     }
     Iterator end() {
-        return Iterator(nullptr);
+        return Iterator(this->tail->getPrevious());
     }
 };

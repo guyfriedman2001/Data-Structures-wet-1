@@ -217,11 +217,11 @@ protected:
      * absorb a given node into 'this', effectively 'deleting' 'this'.
      */
     void absorbNode(AVLNode<Value>* nodeToAbsorb){
-        assert(!(this->isLeaf()));
+        //assert(!(this->isLeaf()));
         this->index = nodeToAbsorb->index;
-        delete this->value;
+        Value* temp = this->value;
         this->value = nodeToAbsorb->value;
-        nodeToAbsorb->value = nullptr;
+        nodeToAbsorb->value = temp;
         delete nodeToAbsorb;
         this->heightUpdate(); //extra call
     }
@@ -231,6 +231,8 @@ protected:
      */
     void absorbChild(){
         assert(this->oneChild());
+        assert(this->left == nullptr || this->left->isLeaf());
+        assert(this->right == nullptr || this->right->isLeaf());
         AVLNode<Value>* child = nullptr;
         if (this->left != nullptr){
             child = this->left;
@@ -241,6 +243,8 @@ protected:
         this->absorbNode(child);
     }
 
+
+
     /**
      * replace the value of 'this' with its succesor in the in-order order.
      */
@@ -249,13 +253,16 @@ protected:
         AVLNode<Value>* succssesor = nullptr;
         if (this->right->left == nullptr){
             succssesor = this->right;
-            this->right = nullptr;
+            this->right = succssesor->right;
+            succssesor->right = nullptr;
         } else {
         succssesor = this->right->getSmallest();
         }
-        int succssesorIndex = succssesor->index;
+        //int succssesorIndex = succssesor->index;
         this->absorbNode(succssesor);
-        this->right = this->right->updateLeftPath();
+        if (this->right != nullptr) {
+            this->right = this->right->updateLeftPath();
+        }
         this->heightUpdate(); //extra call
     }
 
@@ -283,7 +290,7 @@ protected:
      * 
      * @return - the head of the balanced sub tree
      */
-    AVLNode<Value>* updatePath(int index){ //FIXME function takes O(n) time!
+    AVLNode<Value>* updatePath(int index){ //function takes O(n) time!
         assert(false); //this function should not be called
         int thisIndex = this->index;
         int fixIndex = index;
