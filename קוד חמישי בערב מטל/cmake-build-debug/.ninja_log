@@ -1,0 +1,6 @@
+# ninja log v6
+8	2748	1735302993549434409	CMakeFiles/MyExecutable.dir/Herd.cpp.o	ef984323336f773e
+5	2771	1735302993546110209	CMakeFiles/MyExecutable.dir/Horse.cpp.o	995b461c214ab567
+11	2923	1735302993552837907	CMakeFiles/MyExecutable.dir/main25a1.cpp.o	26cb42569b0d9054
+3	2958	1735302993544362622	CMakeFiles/MyExecutable.dir/plains25a1.cpp.o	1b231c0acfe6b336
+2958	3082	1735302996499840981	MyExecutable	e6258b438c3c995f
