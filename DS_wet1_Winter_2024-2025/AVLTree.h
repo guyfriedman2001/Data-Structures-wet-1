@@ -15,6 +15,7 @@ public:
     AVLTree():head(nullptr){}
     virtual ~AVLTree(){
         delete head;
+        head = nullptr;
     }
 
     bool insert(Value* value, int id){

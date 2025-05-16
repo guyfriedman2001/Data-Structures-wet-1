@@ -1,7 +1,0 @@
-# ninja log v6
-5	173	1735123948085578085	build.ninja	5bf3362e3e92bf9e
-12	1170	1735123546262514287	CMakeFiles/MyExecutable.dir/Horse.cpp.o	3e3a0d58be762148
-11	1252	1735123546261520663	CMakeFiles/MyExecutable.dir/plains25a1.cpp.o	a58998984b5da52a
-12	1177	1735123546262918206	CMakeFiles/MyExecutable.dir/Herd.cpp.o	b27bd49ca2c29ca8
-8	1155	1735123961833380185	CMakeFiles/MyExecutable.dir/main25a1.cpp.o	b401f57cf18408b6
-1157	1266	1735123962981744689	MyExecutable	e6258b438c3c995f

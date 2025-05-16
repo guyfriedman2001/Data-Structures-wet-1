@@ -39,7 +39,8 @@ bool Horse::leaveHerd(){
     this->herd->leave();
     this->herd = nullptr;
     this->follows = nullptr;
-    thisLink->removeYourself();
+    thisLink->allPointersNull(); //FIXME
+    delete thisLink;
     this->thisLink = nullptr;
     ++(this->herdInsertions);
     return true;

@@ -19,6 +19,9 @@ public:
     bool operator>(const Herd& otherHerd) const;
     bool operator<(const Herd& otherHerd) const;
 
+    int get_total_members() {
+        return this->totalMembers;
+    }
     bool add_horse(Horse* horse){
         assert(addHorseAssertHelper(horse));
         herdMembers.insert(horse);
@@ -26,6 +29,10 @@ public:
         horse->join_herd(this);
         horse->setLink(this->herdMembers.getHead());
         return true;
+    }
+
+    bool isEmpty() {
+        return this->herdMembers.getHead()->getData() == nullptr;
     }
 
     bool addHorseAssertHelper(Horse* horse) {

@@ -1,23 +1,25 @@
-#pragma once
 #include <cassert>
-#define NULL_ID (-1)
-#include  <iostream>
-//#include "AVL.h"
-#include "wet1util.h"
-#define EMPTY_TREE_HEIGHT -1
-#include <new>
-using std::cout;
 
-template <typename Value>
-class AVLNode {
+template <typename Derived, typename V, typename R>
+class AbstractAVL {
 protected:
+    static constexpr int EMPTY_TREE_HEIGHT = 0;
+    static constexpr int MINUS_INFINITY = INT64_MIN;
     int index;
-    Value* value;
-    AVLNode<Value>* left;
-    AVLNode<Value>* right;
+    V* value;
+    Derived<V, R>* left;
+    Derived<V, R>* right;
+    Derived<V, R>* parent; // added to allow inorder travel without allocating extra memory
     int height;
+    R* returnVal; // This should be null (or equivalent) unless actively holding a required return value
 
 public:
+//    iterator begin() {
+//        return iterator(this);
+//    }
+//    iterator end() {
+//        return iterator(nullptr);
+//    }
 
     enum class Roll {
         noRoll,
@@ -27,112 +29,115 @@ public:
         RR
     };
 
-    AVLNode(Value* value, int id)
-        : index(id), value(value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT+1){}
+    AbstractAVL(V& value)
+        : index(value.getId()), value(value), left(nullptr), right(nullptr), height(EMPTY_TREE_HEIGHT + 1), returnVal(nullptr) {}
 
-    virtual ~AVLNode(){
-        delete this->left;
-        delete this->right;
-        delete this->value;
-        this->left = nullptr;
-        this->right = nullptr;
-        this->value = nullptr;
-
+    virtual ~AbstractAVL() {
+        delete left;
+        delete right;
+        deleteValue();
+        deleteReturnVal();
     }
 
     /**
-     * this function will be used for debugging in AVL class
-     * for example - assert(heightVerified()) after inserting or deleting
-     * values
+     * return a new node of an instance of the inhereting class
+     * 
+     * @param value - the value to be contained in the node
+     * @return - a node of an instance of the inhereting class avl with the supplied value
      */
-    bool heightVerified(){
-        //if (node == nullptr){return true;}
-        bool leftTree = true;
-        if (this->left != nullptr) {
-            leftTree = this->left->heightVerified();
-        }
-        bool rightTree = true;
-        if (this->right != nullptr) {
-            rightTree = this->right->heightVerified();
-        }
-        int oldHeight = this->height;
-        int newHeight = this->heightUpdate();
-        bool thisNode = (oldHeight == newHeight);
-        return leftTree&&rightTree&&thisNode;
+    virtual Derived<V, R>* returnNewInstance(V& value) = 0;
+
+    /**
+     * define the desired behavior of the tree when a node with
+     * an existing value / index is given.
+     * 'this' in this case would refer to the node that is already in the tree containing the same index.
+     * desired data should be stored in 'this', since otherNode will be deleted straight after this function is called.
+     * returnVal could be stored in either nodes.
+     * 
+     * @param otherNode - the node that was trying to be inserted. 
+     */
+    virtual void sameIndex(Derived<V, R>* otherNode) = 0;
+
+    /**
+     * @return - desired value indicating a sucssesful insertion
+     */
+    virtual R* insertionSucces() = 0;
+
+    /**
+     * @return - desired value indicating a sucssesful deletion
+     */
+    virtual R* deleteSucces() = 0;
+
+    /**
+     * @return - desired value indicating that a deleted value was not found
+     */
+    virtual R* deleteNotFound() = 0;
+
+    /**
+     * FOR OWNING TREES ONLY - add call to the destructor of value
+     * FOR NON OWNING TREES - do nothing
+     */
+    virtual void deleteValue() = 0;
+
+    /**
+     * how to handle deletion of returnVal
+     */
+    virtual void deleteReturnVal() = 0;
+
+    /**
+     * this function decides what happens when no return value is instantiated
+     * 
+     * default behaviour - no return value found is bad
+     */
+    virtual void noReturnValFound(){
+        throw "Problem in 'updateReturnVal' - no return value instantiated";
     }
 
     /**
-     * same as above
+     * new function must provide default implementation
      */
-    bool isBalanced(){
-        //no need for bull check, taken care of by AVLTree
-        bool leftTree = true;
-        if (this->left != nullptr) {
-            leftTree = this->left->isBalanced();
-        }
-        bool rightTree = true;
-        if (this->right != nullptr) {
-            rightTree = this->right->isBalanced();
-        }
-        int nodesBalance = this->balanceFactor();
-        bool thisNode = ((-1<=nodesBalance) && (nodesBalance<=1));
-        return leftTree&&rightTree&&thisNode;
+    virtual R* getReturnVal(){
+        return nullptr;
     }
+
 
 
 protected:
-    template<typename T>
-    friend class AVL;
-    void insertRight(AVLNode<Value>* node) {
+
+    void insertRight(Derived<V, R>* node) {
         if (!this->right) {
             this->right = node;
+            this->returnVal = insertionSucces();
         } else {
             this->right = this->right->insert(node);
+            this->returnVal = this->right->returnVal;
         }
     }
 
-    void insertLeft(AVLNode<Value>* node) {
+    void insertLeft(Derived<V, R>* node) {
         if (!this->left) {
             this->left = node;
+            this->returnVal = insertionSucces();
         } else {
             this->left = this->left->insert(node);
+            this->returnVal = this->left->returnVal;
         }
     }
 
-//    /**
-//     * this function will be used for debugging in AVL class
-//     * for example - assert(heightVerified()) after inserting or deleting
-//     * values
-//     */
-//    bool heightVerified(AVLNode<Value>* node){
-//        if (node == nullptr){
-//            return true;
-//        }
-//        bool leftTree = heightVerified(node->left);
-//        bool rightTree = heightVerified(node->right);
-//        int oldHeight = node->height;
-//        int newHeight = node->heightUpdate();
-//        bool thisNode = (oldHeight == newHeight);
-//        return leftTree&&rightTree&&thisNode;
-//    }
-//
-//    /**
-//     * same as above
-//     */
-//    bool isBalanced(AVLNode<Value>* node){
-//        if (node == nullptr){
-//            return true;
-//        }
-//        bool leftTree = isBalanced(node->left);
-//        bool rightTree = isBalanced(node->right);
-//        int nodesBalance = node->balanceFactor();
-//        bool thisNode = ((-1<=nodesBalance) && (nodesBalance<=1));
-//        return leftTree&&rightTree&&thisNode;
-//    }
+    void updateReturnVal(Derived<V, R>* node) {
+        if (this->returnVal) return;
+        if (node->returnVal) {
+            this->returnVal = node->returnVal;
+            node->returnVal = nullptr; // Reset node's returnVal
+            return;
+        }
+        //if we got to this line, either there is an extra call to this function, or returnval was not instantiated correctly.
+        bool noReturnValFound = true;
+        assert(!noReturnValFound);
+        //noReturnValFound();
+    }
 
-
-
-    AVLNode<Value>* Balance() {
+    Derived<V, R>* Balance() {
         this->heightUpdate(); //make sure height is updated
         Roll roll = this->getRoll();
         switch (roll) {
@@ -147,8 +152,7 @@ protected:
             case Roll::RR:
                 return this->RR();
             default:
-                assert(false);
-                return this;
+                throw "Problem in Balance switch case";
         }
     }
 
@@ -164,14 +168,14 @@ protected:
         return this->height;
     }
 
-    int balanceFactor() {
+    int balanceFactor() const {
         this->heightUpdate(); //make sure height is updated
         int leftHeight = this->left ? this->left->height : EMPTY_TREE_HEIGHT;
         int rightHeight = this->right ? this->right->height : EMPTY_TREE_HEIGHT;
         return leftHeight - rightHeight;
     }
 
-    Roll getRoll() {
+    Roll getRoll() const {
         this->heightUpdate(); //make sure height is updated
         int balance = this->balanceFactor();
         if (-1 <= balance && balance <= 1) return Roll::noRoll;
@@ -181,31 +185,29 @@ protected:
         return this->right->balanceFactor() <= 0 ? Roll::RR : Roll::RL;
     }
 
-    AVLNode<Value>* LL() {
-        AVLNode<Value>* temp = this->left;
+    Derived<V, R>* LL() {
+        Derived<V, R>* temp = this->left;
         this->left = temp->right;
         temp->right = this;
-        this->heightUpdate();
-        temp->heightUpdate();
+        temp->updateReturnVal(this);
         return temp;
     }
 
-    AVLNode<Value>* LR() {
+    Derived<V, R>* LR() {
         this->left = this->left->RR();
         return this->LL();
     }
 
-    AVLNode<Value>* RL() {
+    Derived<V, R>* RL() {
         this->right = this->right->LL();
         return this->RR();
     }
 
-    AVLNode<Value>* RR() {
-        AVLNode<Value>* temp = this->right;
+    Derived<V, R>* RR() {
+        Derived<V, R>* temp = this->right;
         this->right = temp->left;
         temp->left = this;
-        this->heightUpdate();
-        temp->heightUpdate();
+        temp->updateReturnVal(this);
         return temp;
     }
 
@@ -224,14 +226,15 @@ protected:
     /**
      * absorb a given node into 'this', effectively 'deleting' 'this'.
      */
-    void absorbNode(AVLNode<Value>* nodeToAbsorb){
-        //assert(!(this->isLeaf()));
+    void absorbNode(Derived<V, R>* nodeToAbsorb){
+        assert(!this->isLeaf());
+        this->deleteValue{};
         this->index = nodeToAbsorb->index;
-        Value* temp = this->value;
         this->value = nodeToAbsorb->value;
-        nodeToAbsorb->value = temp;
+        nodeToAbsorb->value = nullptr;
         delete nodeToAbsorb;
         this->heightUpdate(); //extra call
+        //NOTICE NO returnVal CREATED HERE!
     }
 
     /**
@@ -239,9 +242,7 @@ protected:
      */
     void absorbChild(){
         assert(this->oneChild());
-        assert(this->left == nullptr || this->left->isLeaf());
-        assert(this->right == nullptr || this->right->isLeaf());
-        AVLNode<Value>* child = nullptr;
+        Derived<V, R>* child = nullptr;
         if (this->left != nullptr){
             child = this->left;
         } else {
@@ -251,26 +252,21 @@ protected:
         this->absorbNode(child);
     }
 
-
-
     /**
      * replace the value of 'this' with its succesor in the in-order order.
      */
     void replaceWithSuccssessor(){
         assert(this->twoChildern());
-        AVLNode<Value>* succssesor = nullptr;
+        Derived<V, R>* succssesor = nullptr;
         if (this->right->left == nullptr){
             succssesor = this->right;
-            this->right = succssesor->right;
-            succssesor->right = nullptr;
+            this->right = nullptr;
         } else {
         succssesor = this->right->getSmallest();
         }
-        //int succssesorIndex = succssesor->index;
+        int succssesorIndex = succssesor->index;
         this->absorbNode(succssesor);
-        if (this->right != nullptr) {
-            this->right = this->right->updateLeftPath();
-        }
+        this->right = this->right->updatePath(succssesorIndex);
         this->heightUpdate(); //extra call
     }
 
@@ -281,14 +277,13 @@ protected:
      * 
      * @return - the value with the smallest index of a given tree
      */
-    AVLNode<Value>* getSmallest() {
+    Derived<V, R>* getSmallest() {
         assert(this->left != nullptr);
         if(this->left->left != nullptr){
             return this->left->getSmallest();
         }
-        AVLNode<Value>* temp = this->left;
+        Derived<V, R>* temp = this->left;
         this->left = temp->right;
-        temp->right = nullptr;
         assert(temp->left == nullptr);
         return temp;
     }
@@ -298,8 +293,7 @@ protected:
      * 
      * @return - the head of the balanced sub tree
      */
-    AVLNode<Value>* updatePath(int index){ //function takes O(n) time!
-        assert(false); //this function should not be called
+    Derived<V, R>* updatePath(int index){
         int thisIndex = this->index;
         int fixIndex = index;
         assert(thisIndex != fixIndex);
@@ -312,32 +306,19 @@ protected:
         return this->Balance();
     }
 
-        /**
-     * update path along an index.
-     * 
-     * @return - the head of the balanced sub tree
-     */
-    AVLNode<Value>* updateLeftPath(){
-        if (this->left == nullptr){
-            return this->Balance();
-        }
-        this->left = this->left->updateLeftPath();
-        return this->Balance();
-    }
-
-    AVLNode<Value>* deleteThis() { //return the sub tree of 'this' without the node of 'this'.
-        delete this->value;
-        this->value = nullptr;
+    Derived<V, R>* deleteThis() { //return the sub tree of 'this' without the node of 'this'.
+        this->deleteValue();
         if (this->isLeaf()) {
             delete this;
             return nullptr;
         }
-        if (this->oneChild()){
+        if (this->oneChild){
             this->absorbChild();
         }
         if (this->twoChildern()){
             this->replaceWithSuccssessor();
         }
+        this->returnVal = deleteSucces();
         this->heightUpdate();
         return this->Balance();
     }
@@ -353,10 +334,9 @@ public:
      * @param value - value of the node to be inserted.
      * @return - the root of the balanced tree after the addition of the new value.
      */
-    AVLNode<Value>* insert(Value* value, int id) { //removed const, we are deleting the value after runtime
-        AVLNode<Value>* insertThis = new (std::nothrow) AVLNode<Value>(value,id);
-        if (!insertThis){throw StatusType::ALLOCATION_ERROR;}
-        return this->insert(insertThis);
+    Derived<V, R>* insert(const V& value) {
+        Derived<V, R>* node = returnNewInstance(value);
+        return this->insert(node);
     }
     
     /**
@@ -365,12 +345,13 @@ public:
      * @param node - the node to be inserted into the tree of 'this'
      * @return - the balanced tree of 'this' after insertion
      */
-    AVLNode<Value>* insert(AVLNode<Value>* node) {
+    Derived<V, R>* insert(Derived<V, R>* node) {
         int nodeIndex = node->index;
         int thisIndex = this->index;
 
         if (nodeIndex == thisIndex) {
-            cout << "inserted node with same index as existing node";
+            this->sameIndex(node);
+            this->updateReturnVal(node);
             delete node;
             return this;
         }
@@ -391,15 +372,9 @@ public:
      * @param value - value to be deleted/ removed from the tree.
      * @return - the balanced tree without the removed value.
      */
-    /**
-     *
-    AVLNode<Value>* deleteNode(Value* value) {
-        int toDelete = value.getId();
-        return this->deleteNode(toDelete);
+    Derived<V, R>* deleteNode(V& value) {
+        return this->deleteNode(value.getId());
     }
-     *
-     */
-
 
     /**
      * remove a node from the tree of 'this', return the balanced tree, with returnVal updated at
@@ -410,18 +385,20 @@ public:
      * @param index - the index of the node to be removed.
      * @return - the balanced tree after the removal of said node.
      */
-    AVLNode<Value>* deleteNode(int index) {
+    Derived<V, R>* deleteNode(int index) {
         if (index == this->index) {
             return this->deleteThis();
         }
 
         if (index < this->index) {
             if (!this->left) {
+                this->returnVal = deleteNotFound();
                 return this;
             }
             this->left = this->left->deleteNode(index);
         } else {
             if (!this->right) {
+                this->returnVal = deleteNotFound();
                 return this;
             }
             this->right = this->right->deleteNode(index);
@@ -440,24 +417,75 @@ public:
      * @param index - the index of the value to retrieve its pointer.
      * @return - a pointer to the value of the corresponding index.
      */
-    Value* find(int index){
+    V* find(int index){
             if (index == this->index) {
             return this->value;
         }
-        Value* searchedValue = nullptr;
+        V* searchedValue = nullptr;
         if (index < this->index) {
             if (!this->left) {
+                this->returnVal = findNotFound();
                 return nullptr;
             }
             searchedValue = this->left->find(index);
+            this->updateReturnVal(this->left);
         } else {
             if (!this->right) {
+                this->returnVal = findNotFound();
                 return nullptr;
             }
             searchedValue = this->right->find(index);
+            this->updateReturnVal(this->right);
         }
         return searchedValue;
     }
 };
 
-
+/**
+ *
+ * added Itertor class for inorder travel
+ * changes made- added parent pointer to AbstractAVL structure,
+ * we now need to make sure to properly set a parent in the tree methods (insert and delete)
+ */
+//template <typename Derived, typename V, typename R>
+//class AbstractAVL::Iterator{
+//    AbstractAVL* current;
+//
+//    // finds the left most node (minimal value);
+//    void FindLeft(AbstractAVL* node) {
+//        while (node && node->left) {
+//            node = node->left;
+//        }
+//        return node;
+//    }
+//    // finds the next node in inorder travel
+//    AbstractAVL* findNext(AbstractAVL* node) {
+//        if (node->right) {
+//            // If there is a right subtree, the next node is the leftmost node in that subtree
+//            return findLeft(node->right);
+//        }
+//        // Otherwise, move up to the parent until the node is a left child
+//        AbstractAVL* parent = node->parent;
+//        while (parent && node == parent->right) {
+//            node = parent;
+//            parent = parent->parent;
+//        }
+//        return parent;
+//    }
+//
+//public:
+//    iterator(AbstractAVL* root = nullptr) : current(findLeft(root)) {}
+//    V& operator*() const {
+//        return current->value;
+//    }
+//    iterator& operator++() {
+//        current = findNext(current);
+//        return *this;
+//    }
+//    bool operator==(const iterator& other) const {
+//        return current == other.current;
+//    }
+//    bool operator!=(const iterator& other) const {
+//        return !(*this == other);
+//    }
+//};

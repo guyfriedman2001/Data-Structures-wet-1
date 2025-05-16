@@ -144,10 +144,29 @@ StatusType Plains::leave_herd(int horseId)
         return StatusType::INVALID_INPUT;
     }
     Horse* horseToLeave = allHorses.get(horseId);
-    if (horseToLeave == nullptr){
+    if (horseToLeave == nullptr || horseToLeave->getHerdID() <= 0){
         return StatusType::FAILURE;
     }
+        Herd* herd = horseToLeave->getHerd();
+        if (herd == nullptr) {
+            return StatusType::FAILURE;
+        }
     bool succes = horseToLeave->leaveHerd();
+
+        if (herd != nullptr && herd->isEmpty()) {
+            int oldid = herd->getID();
+            nonEmptyHerds.remove(oldid);
+            Herd* newHerd = nullptr;
+            try {
+                newHerd = new Herd(oldid);
+                if (newHerd == nullptr) {
+                    return StatusType::ALLOCATION_ERROR;
+                }
+            } catch (...) {
+                return StatusType::ALLOCATION_ERROR;
+            }
+            emptyHerds.insert(newHerd,oldid);
+        }
     return (succes)?(StatusType::SUCCESS):(StatusType::FAILURE);
     } catch (StatusType e){
         return StatusType::ALLOCATION_ERROR;

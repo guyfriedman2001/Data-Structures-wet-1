@@ -36,7 +36,8 @@ public:
 
 
     Horse(int id, int speed) : horseId(id), speed(speed), herdID(NULL_ID), herdInsertions(0),
-                               follows(nullptr), followsInsertion(0), special_bool(false), herd(nullptr), thisLink(nullptr){}
+                               follows(nullptr), followsInsertion(0), special_bool(false), herd(nullptr),
+                                thisLink(nullptr){}
     ~Horse(){
         this->follows = nullptr;
         this->herd = nullptr;

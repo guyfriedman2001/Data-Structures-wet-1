@@ -14,11 +14,13 @@ class Node {
 public:
     explicit Node(T* data = nullptr, Node<T>* next = nullptr, Node<T>* previous = nullptr)
             : data(data), next(next), previous(previous) {}
-    ~Node(){
-        delete next;
+    //~Node(){delete this->next;this->next = nullptr;previous = nullptr;data = nullptr;};
+    ~Node() {
+        // Do not recursively delete next node; let LinkedList manage memory.
+        next = nullptr;
         previous = nullptr;
         data = nullptr;
-    };
+    }
 
     Node<T>* getNext() {
         return this->next;
@@ -35,13 +37,12 @@ public:
     void setPrevious(Node<T>* newPrevious) {
         this->previous = newPrevious;
     }
-    void removeYourself() {
+    void allPointersNull() {
         this->next->previous = this->previous;
         this->previous->next = this->next;
         this->next = nullptr;
         this->previous = nullptr;
         this->data = nullptr;
-        delete this;
     }
 };
 
@@ -74,10 +75,19 @@ public:
     }
      */
 
-    ~LinkedList() = default;
+    //~LinkedList() = default;
     Node<T>* getHead() {
         return this->head->getNext();
     }
+    ~LinkedList() {
+        Node<T>* current = head;
+        while (current) {
+            Node<T>* next = current->getNext();
+            delete current;  // Safely deletes each node
+            current = next;
+        }
+    }
+
     bool insert(T* type){
         Node<T>* newnode = new (std::nothrow) Node<T>(type);
         if (!newnode) {

@@ -1,0 +1,14 @@
+
+./TechnionDataStructures/HomeworkTools/HW1/compile_and_test_mt.sh
+
+ MallocStackLogging=1 leaks -quiet -atExit -- ./my_executable < test40.in
+
+ g++ -std=c++11 -o my_executable Herd.cpp Horse.cpp plains25a1.cpp main25a1.cpp
+
+cd /Users/guyfriedman/Documents/Technion/Semester_C_11.2024-02.2025/234218/wet1forgit/DS_wet1_Winter_2024-2025
+
+
+
+
+
+

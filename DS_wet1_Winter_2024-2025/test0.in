@@ -1,0 +1,23 @@
+add_horse 1 100
+add_horse 2 200
+add_horse 3 300
+add_herd 1
+join_herd 1 1
+join_herd 2 1
+join_herd 3 1
+follow 1 2
+can_run_together 1
+follow 2 3
+can_run_together 1
+leave_herd 3
+join_herd 3 1
+can_run_together 1
+follow 2 1
+can_run_together 1
+follow 2 3
+can_run_together 1
+leads 1 3
+leads 2 1
+get_speed 1
+get_speed 2
+get_speed 3
