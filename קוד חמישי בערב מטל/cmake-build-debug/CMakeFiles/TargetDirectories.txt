@@ -1,3 +1,0 @@
-/Users/guyfriedman/Documents/Technion/Semester_C_11.2024-02.2025/234218/wet1forgit/קוד חמישי בערב מטל/cmake-build-debug/CMakeFiles/MyExecutable.dir
-/Users/guyfriedman/Documents/Technion/Semester_C_11.2024-02.2025/234218/wet1forgit/קוד חמישי בערב מטל/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/guyfriedman/Documents/Technion/Semester_C_11.2024-02.2025/234218/wet1forgit/קוד חמישי בערב מטל/cmake-build-debug/CMakeFiles/rebuild_cache.dir
